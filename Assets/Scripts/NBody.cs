@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// Every unity distance unit (m) is multiplied by 5 billion for viewable distances.
+// Every unity distance unit (m) is multiplied by 2.5 billion for viewable distances.
 
 struct ObjectData
 {
@@ -16,7 +16,7 @@ public class NBody : MonoBehaviour
     private Vector3 leadForce;
     
     private Vector3 futurePosition;
-    private ObjectData objectData = new ObjectData();
+    private ObjectData objectData;
     
     public float mass = 5.972e24f; // Earth
     
@@ -33,39 +33,17 @@ public class NBody : MonoBehaviour
     {
         gameObject.transform.position = futurePosition;
         
-        float simulationTimestep = Time.fixedDeltaTime * 30;
+        float simulationTimestep = Time.fixedDeltaTime * 30; // simulation speed
         
-        AccumulateForce(transform.position);
+        leadForce = Vector3.zero;
+        
         Integrate(simulationTimestep);
     }
-
-    private void AccumulateForce(Vector3 objectPosition)
-    {
-        leadForce = Vector3.zero;
-        for (int i = 0; i < originator.bodies.Count; i++)
-        {
-            NBody otherBody = originator.bodies[i];
-
-            if (otherBody == this) continue;
-
-            float distance = Vector3.Distance(objectPosition, otherBody.gameObject.transform.position) * distMultiplier;
-
-            if (distance == 0) continue;
-
-            float pullMagnitude = (originator.gravitationalConstant * mass * otherBody.mass) / (distance * distance + 1f);
-            Vector3 pullDirection = (otherBody.transform.position - objectPosition).normalized;
-
-            Vector3 total = pullDirection * pullMagnitude;
-            leadForce += total;
-        }
-    }
-
-
+    //Issues with updating forces
+    // both PredictPosition and Integrate are for moving the body via Velocity Verlet integration
     private ObjectData PredictPosition(Vector3 initialVelocity, Vector3 initialAcceleration, float timestep)
     {
         futurePosition += initialVelocity * timestep + 0.5f * initialAcceleration * (timestep * timestep);
-        
-        AccumulateForce(futurePosition);
         
         ObjectData returnData = new ObjectData();
 
