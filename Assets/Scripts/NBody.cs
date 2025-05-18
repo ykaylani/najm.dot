@@ -6,17 +6,17 @@ public class NBody : MonoBehaviour
 {
     public NBodyOriginator originator;
     
-    private float distMultiplier;
+    private double distMultiplier;
 
-    [HideInInspector]public Vector3 currentAcceleration;
-    [HideInInspector]public Vector3 currentVelocity;
-    [HideInInspector]public Vector3 currentPosition;
+    [HideInInspector]public DVector3 currentAcceleration;
+    [HideInInspector]public DVector3 currentVelocity;
+    [HideInInspector]public DVector3 currentPosition;
     
-    [HideInInspector]public Vector3 predictedPosition;
+    [HideInInspector]public DVector3 predictedPosition;
     
-    public float mass = 5.972e24f; // Earth
+    public double mass = 5.972e24f; // Earth
     
-    public Vector3 impulse;
+    public DVector3 impulse;
     
     private void Start()
     {
@@ -25,7 +25,7 @@ public class NBody : MonoBehaviour
         
         currentPosition = gameObject.transform.position;
         currentVelocity = impulse;
-        currentAcceleration = Vector3.zero;
+        currentAcceleration = DVector3.zero;
     }
 
     private void FixedUpdate()
