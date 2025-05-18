@@ -3,20 +3,20 @@
 
 ###**Key Changes**
 
->Added Barnes-Hut Algorithm
->Realistic Masses, Forces and Distances
->Simulation in Realtime
+>Added Barnes-Hut Algorithm<br>
+>Realistic Masses, Forces and Distances<br>
+>Simulation in Realtime<br>
 >Increased Precision by switching from Floating-point to Double-precision
 
 ###**Bug Fixes**
 
->Fixed Body Ejection caused by Gravitational Singularity
->Increased Simulation Smoothness
+>Fixed Body Ejection caused by Gravitational Singularity<br>
+>Increased Simulation Smoothness<br>
 
 ###**Future Improvements**
 
->Adaptive Simulation Bounds
->Adjustable Simulation speed separate from Unity's Built-in TimeScale
->Adaptive Timestepping
->Higher-Order Integrator (Fourth Order Runge-Kutta)
->Unity DOTS (Jobs, ECS) Integration
+>Adaptive Simulation Bounds<br>
+>Adjustable Simulation speed separate from Unity's Built-in TimeScale<br>
+>Adaptive Timestepping<br>
+>Higher-Order Integrator (Fourth Order Runge-Kutta)<br>
+>Unity DOTS (Jobs, ECS) Integration<br>
