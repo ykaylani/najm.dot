@@ -15,17 +15,13 @@ public class NBody : MonoBehaviour
     [HideInInspector]public Vector3 predictedPosition;
     
     public float mass = 5.972e24f; // Earth
-
-    private float unitmetersPerTimestep;
+    
     public Vector3 impulse;
     
     private void Start()
     {
         
         originator = GameObject.FindGameObjectWithTag("Originator").GetComponent<NBodyOriginator>();
-        distMultiplier = originator.distMultiplier;
-
-        unitmetersPerTimestep = 1 / distMultiplier;
         
         currentPosition = gameObject.transform.position;
         currentVelocity = impulse;
@@ -34,7 +30,6 @@ public class NBody : MonoBehaviour
 
     private void FixedUpdate()
     {
-        print(currentVelocity);
         gameObject.transform.position = currentPosition;
     }
     

@@ -17,9 +17,9 @@ public struct OctreeNode
 public class NBodyOriginator : MonoBehaviour    
 {
     public float gravitationalConstant = 6.67e-11f;
-    public float distMultiplier = 100e10f; // 2.5 billion times bigger
+    public float distMultiplier = 1e9f; // 1 billion times longer
 
-    public float simulationBounds = 100f;
+    public float simulationBounds = 700f;
     
     private List<NBody> bodies;
 
@@ -56,7 +56,10 @@ public class NBodyOriginator : MonoBehaviour
         {
             Vector3 resultantForce = CalculateSubtreeForce(body, octreeOriginator, openingAngleCriterion);
             
+            print(resultantForce);
+            
             Vector3 newAcceleration = resultantForce / body.mass;
+            
             Vector3 newVelocity = body.currentVelocity + 0.5f * (body.currentAcceleration + newAcceleration) * simulationTimestep;
 
             body.currentAcceleration = newAcceleration;
@@ -288,7 +291,9 @@ public class NBodyOriginator : MonoBehaviour
         {
             if (startNode.size / (startNode.centerOfMass - queryBody.predictedPosition).magnitude < openingAngle)
             {
-                float resultantMagnitude = gravitationalConstant * (startNode.totalMass * queryBody.mass / ((startNode.centerOfMass - queryBody.predictedPosition).sqrMagnitude * distMultiplier));
+                
+                float resultantMagnitude = gravitationalConstant * (startNode.totalMass * queryBody.mass / Mathf.Pow((startNode.centerOfMass - queryBody.predictedPosition).magnitude * distMultiplier, 2));
+                
                 Vector3 resultantDirection = (startNode.centerOfMass - queryBody.predictedPosition).normalized;
                 
                 resultant += resultantDirection * resultantMagnitude;
@@ -307,7 +312,8 @@ public class NBodyOriginator : MonoBehaviour
             {
                 if (otherBody == queryBody) continue;
                 
-                float resultantMagnitude = gravitationalConstant * (otherBody.mass * queryBody.mass / ((otherBody.predictedPosition - queryBody.predictedPosition).sqrMagnitude * distMultiplier));
+                float resultantMagnitude = gravitationalConstant * (otherBody.mass * queryBody.mass / Mathf.Pow((otherBody.predictedPosition - queryBody.predictedPosition).magnitude * distMultiplier, 2));
+                
                 Vector3 resultantDirection = (otherBody.predictedPosition - queryBody.predictedPosition).normalized;
                 
                 resultant += resultantDirection * resultantMagnitude;
