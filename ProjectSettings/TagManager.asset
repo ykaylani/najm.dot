@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 3
   tags:
   - Originator
+  - N Body
   layers:
   - Default
   - TransparentFX

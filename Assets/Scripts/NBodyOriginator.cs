@@ -14,40 +14,54 @@ public struct OctreeNode
     public List<NBody> containedBodies;
 }
 
-
-public class NBodyOriginator : MonoBehaviour
+public class NBodyOriginator : MonoBehaviour    
 {
     public float gravitationalConstant = 6.67e-11f;
-    public float distMultiplier = 2.5e9f; // 2.5 billion times bigger
+    public float distMultiplier = 100e10f; // 2.5 billion times bigger
 
     public float simulationBounds = 100f;
     
     private List<NBody> bodies;
 
     //barnes-hut
-    [HideInInspector] public List<OctreeNode> nodes;
+    [HideInInspector] public List<OctreeNode> nodes = new List<OctreeNode>();
     private OctreeNode octreeOriginator;
-
+ 
     public float openingAngleCriterion = 0.3f;
+    public float simulationTimestep;
 
     void Start()
     {
         bodies = FindObjectsByType<NBody>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).ToList();
+        octreeOriginator.containedBodies = FindObjectsByType<NBody>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).ToList();
         
         octreeOriginator.worldPosition = Vector3.zero;
         octreeOriginator.size = simulationBounds;
-        octreeOriginator.containedBodies = FindObjectsByType<NBody>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).ToList();
+        octreeOriginator.octreeChildren = new List<OctreeNode>();
     }
 
     void FixedUpdate()
     {
         nodes.Clear();
         nodes.Add(octreeOriginator);
+        
+        foreach (NBody body in bodies)
+        {
+            body.predictedPosition = body.currentPosition + body.currentVelocity * simulationTimestep + 0.5f * (body.currentAcceleration * (simulationTimestep * simulationTimestep));
+        }
+        
         BuildOctree(octreeOriginator);
 
         foreach (NBody body in bodies)
         {
-            body.leadForce = ForceAccumulation(body, octreeOriginator, openingAngleCriterion);
+            Vector3 resultantForce = CalculateSubtreeForce(body, octreeOriginator, openingAngleCriterion);
+            
+            Vector3 newAcceleration = resultantForce / body.mass;
+            Vector3 newVelocity = body.currentVelocity + + 0.5f * (body.currentAcceleration + newAcceleration) * simulationTimestep;
+
+            body.currentAcceleration = newAcceleration;
+            body.currentVelocity = newVelocity;
+            body.currentPosition = body.predictedPosition;
         }
     }
 
@@ -56,37 +70,53 @@ public class NBodyOriginator : MonoBehaviour
     {
         if (node.containedBodies.Count > 3)
         {
-            OctreeNode xyz = new OctreeNode();
+            OctreeNode xyz = new OctreeNode(); //+++
             xyz.worldPosition = new Vector3(node.worldPosition.x + node.size / 4f, node.worldPosition.y + node.size / 4f, node.worldPosition.z + node.size / 4f);
             xyz.size = node.size / 2;
+            xyz.octreeChildren = new List<OctreeNode>();
+            xyz.containedBodies = new List<NBody>();
             
-            OctreeNode xNegYz = new OctreeNode();
+            OctreeNode xNegYz = new OctreeNode(); //+-+
             xNegYz.worldPosition = new Vector3(node.worldPosition.x + node.size / 4f, node.worldPosition.y - node.size / 4f, node.worldPosition.z + node.size / 4f);
             xNegYz.size = node.size / 2;
+            xNegYz.octreeChildren = new List<OctreeNode>();
+            xNegYz.containedBodies = new List<NBody>();
             
-            OctreeNode negXyz = new OctreeNode();
+            OctreeNode negXyz = new OctreeNode();//-++
             negXyz.worldPosition = new Vector3(node.worldPosition.x - node.size / 4f, node.worldPosition.y + node.size / 4f, node.worldPosition.z + node.size / 4f);
             negXyz.size = node.size / 2;
+            negXyz.octreeChildren = new List<OctreeNode>();
+            negXyz.containedBodies = new List<NBody>();
             
-            OctreeNode negXNegYz = new OctreeNode();
+            OctreeNode negXNegYz = new OctreeNode();//--+
             negXNegYz.worldPosition = new Vector3(node.worldPosition.x - node.size / 4f, node.worldPosition.y - node.size / 4f, node.worldPosition.z + node.size / 4f);
             negXNegYz.size = node.size / 2;
+            negXNegYz.octreeChildren = new List<OctreeNode>();
+            negXNegYz.containedBodies = new List<NBody>();
             
-            OctreeNode xyNegZ = new OctreeNode();
+            OctreeNode xyNegZ = new OctreeNode();//++-
             xyNegZ.worldPosition = new Vector3(node.worldPosition.x + node.size / 4f, node.worldPosition.y + node.size / 4f, node.worldPosition.z - node.size / 4f);
             xyNegZ.size = node.size / 2;
+            xyNegZ.octreeChildren = new List<OctreeNode>();
+            xyNegZ.containedBodies = new List<NBody>();
             
-            OctreeNode xNegYNegZ = new OctreeNode();
-            xNegYNegZ.worldPosition = new Vector3(node.worldPosition.x + node.size / 4f, node.worldPosition.y - node.size / 4f, node.worldPosition.z + node.size / 4f);
+            OctreeNode xNegYNegZ = new OctreeNode();//+--
+            xNegYNegZ.worldPosition = new Vector3(node.worldPosition.x + node.size / 4f, node.worldPosition.y - node.size / 4f, node.worldPosition.z - node.size / 4f);
             xNegYNegZ.size = node.size / 2;
+            xNegYNegZ.octreeChildren = new List<OctreeNode>();
+            xNegYNegZ.containedBodies = new List<NBody>();
             
-            OctreeNode negXyNegZ = new OctreeNode();
+            OctreeNode negXyNegZ = new OctreeNode();//-+-
             negXyNegZ.worldPosition = new Vector3(node.worldPosition.x - node.size / 4f, node.worldPosition.y + node.size / 4f, node.worldPosition.z - node.size / 4f);
             negXyNegZ.size = node.size / 2;
+            negXyNegZ.octreeChildren = new List<OctreeNode>();
+            negXyNegZ.containedBodies = new List<NBody>();
             
-            OctreeNode negXNegYNegZ = new OctreeNode();
+            OctreeNode negXNegYNegZ = new OctreeNode();//---
             negXNegYNegZ.worldPosition = new Vector3(node.worldPosition.x - node.size / 4f, node.worldPosition.y - node.size / 4f, node.worldPosition.z - node.size / 4f);
             negXNegYNegZ.size = node.size / 2;
+            negXNegYNegZ.octreeChildren = new List<OctreeNode>();
+            negXNegYNegZ.containedBodies = new List<NBody>();
             
             node.octreeChildren.Add(xyz);
             node.octreeChildren.Add(xNegYz);
@@ -173,10 +203,6 @@ public class NBodyOriginator : MonoBehaviour
                 {
                     negXNegYNegZ.containedBodies.Add(evaluatedBody);
                 }
-                else if (normalizedDirection == Vector3.zero)
-                {
-                    negXyz.containedBodies.Add(evaluatedBody);
-                }
                 
                 node.containedBodies.RemoveAt(j);
             }
@@ -220,14 +246,30 @@ public class NBodyOriginator : MonoBehaviour
             {
                 BuildOctree(negXNegYNegZ);
             }
+            
+            node.centerOfMass = Vector3.zero;
+            node.totalMass = 0;
+            
+            for (int i = 0; i < node.octreeChildren.Count; i++)
+            {
+                node.centerOfMass += node.octreeChildren[i].centerOfMass * node.octreeChildren[i].totalMass;
+                node.totalMass += node.octreeChildren[i].totalMass;
+            }
+            
+            if (node.totalMass > 0)
+            {
+                node.centerOfMass /= node.totalMass;
+            }
+            
         }
         else
         {
-            node.octreeChildren = null;
+            node.octreeChildren = new List<OctreeNode>();
+            node.octreeChildren.Clear();
             
             for (int i = 0; i < node.containedBodies.Count; i++)
             {
-                node.centerOfMass += node.containedBodies[i].gameObject.transform.position * node.containedBodies[i].mass;
+                node.centerOfMass += node.containedBodies[i].predictedPosition * node.containedBodies[i].mass;
                 node.totalMass += node.containedBodies[i].mass;
             }
 
@@ -238,55 +280,41 @@ public class NBodyOriginator : MonoBehaviour
         }
     }
 
-    public Vector3 ForceAccumulation(Vector3 bodyPosition, float bodyMass, OctreeNode rootNode, float openingAngleCriterion)
+    public Vector3 CalculateSubtreeForce(NBody queryBody, OctreeNode startNode, float openingAngle)
     {
-        for (int i = 0; i < originator.nodes.Count; i++)
+        Vector3 resultant = Vector3.zero;
+        
+        if (startNode.octreeChildren.Count > 0)
         {
-            OctreeNode node = originator.nodes[i];
-
-            Vector3 otherPosition = Vector3.zero;
-            float otherMass;
-
-            if (node.octreeChildren == null)
+            if (startNode.size / (startNode.centerOfMass - queryBody.predictedPosition).magnitude < openingAngle)
             {
-                foreach (NBody otherBody in node.containedBodies)
-                {
-                    otherPosition = otherBody.transform.position;
-                    otherMass =  otherBody.mass;
-                    
-                    float distance = Vector3.Distance(objectPosition, otherPosition) * distMultiplier;
-
-                    float pullMagnitude = (originator.gravitationalConstant * mass * otherMass) / (distance * distance + 1f);
-                    Vector3 pullDirection = (otherPosition - objectPosition).normalized;
-
-                    Vector3 total = pullDirection * pullMagnitude;
-                    leadForce += total;
-                }
+                float resultantMagnitude = gravitationalConstant * (startNode.totalMass * queryBody.mass / ((startNode.centerOfMass - queryBody.predictedPosition).sqrMagnitude * distMultiplier));
+                Vector3 resultantDirection = (startNode.centerOfMass - queryBody.predictedPosition).normalized;
+                
+                resultant += resultantDirection * resultantMagnitude;
             }
             else
             {
-                if (node.size / Vector3.Distance(objectPosition, node.worldPosition) < originator.openingAngleCriterion)
+                foreach (OctreeNode child in startNode.octreeChildren)
                 {
-                    otherPosition = node.centerOfMass;
-                    otherMass = node.totalMass;
-                    
-                    float distance = Vector3.Distance(objectPosition, otherPosition) * distMultiplier;
-
-                    float pullMagnitude = (originator.gravitationalConstant * mass * otherMass) / (distance * distance + 1f);
-                    Vector3 pullDirection = (otherPosition - objectPosition).normalized;
-
-                    Vector3 total = pullDirection * pullMagnitude;
-                    leadForce += total;
-                }
-                else
-                {
-                    foreach (OctreeNode containedNode in node.octreeChildren)
-                    {
-                        AccumulateForce(transform.position, originator.nodes.IndexOf(containedNode));
-                    }
+                    resultant += CalculateSubtreeForce(queryBody, child, openingAngle);
                 }
             }
         }
+        else
+        {
+            foreach (NBody otherBody in startNode.containedBodies)
+            {
+                if (otherBody == queryBody) continue;
+                
+                float resultantMagnitude = gravitationalConstant * (otherBody.mass * queryBody.mass / ((otherBody.predictedPosition - queryBody.predictedPosition).sqrMagnitude * distMultiplier));
+                Vector3 resultantDirection = (otherBody.predictedPosition - queryBody.predictedPosition).normalized;
+                
+                resultant += resultantDirection * resultantMagnitude;
+            }
+        }
+
+        return resultant;
     }
     
 }

@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 336292748}
   m_Layer: 0
   m_Name: Body1
-  m_TagString: Untagged
+  m_TagString: N Body
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -378,7 +378,7 @@ GameObject:
   - component: {fileID: 466824825}
   m_Layer: 0
   m_Name: Body2
-  m_TagString: Untagged
+  m_TagString: N Body
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -517,10 +517,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gravitationalConstant: 6.67e-11
   distMultiplier: 1e+10
-  epsilon: 0.05
-  bodies:
-  - {fileID: 336292748}
-  - {fileID: 466824825}
+  simulationBounds: 100
+  openingAngleCriterion: 0.5
 --- !u!4 &1196126445
 Transform:
   m_ObjectHideFlags: 0
