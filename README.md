@@ -3,7 +3,7 @@ early-stage N-Body Simulation implemented in Unity.
 
 ### Version 0.1 Changes
 
-- **Key Changes**
+**Key Changes**
 
 
 
@@ -17,7 +17,7 @@ early-stage N-Body Simulation implemented in Unity.
 
 
 
-- **Bug Fixes**
+**Bug Fixes**
 
 
 
@@ -27,7 +27,7 @@ early-stage N-Body Simulation implemented in Unity.
 
 
 
-- **Future Improvements**
+**Future Improvements**
 
 
 
