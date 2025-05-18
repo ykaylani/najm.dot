@@ -50,7 +50,7 @@ public class NBodyOriginator : MonoBehaviour
             body.predictedPosition = body.currentPosition + body.currentVelocity * simulationTimestep + (body.currentAcceleration * (simulationTimestep * simulationTimestep)) * 0.5;
         }
         
-        BuildOctree(octreeOriginator);
+        BuildOctree(octreeOriginator, 0);
 
         foreach (NBody body in bodies)
         {
@@ -65,10 +65,12 @@ public class NBodyOriginator : MonoBehaviour
     }
 
     //creates octree for barnes-hut algorithm
-    void BuildOctree(OctreeNode node)
+    void BuildOctree(OctreeNode node, int recursionDepth)
     {
-        if (node.containedBodies.Count > 3)
+        if (node.containedBodies.Count > 2 && recursionDepth < 15)
         {
+            recursionDepth++;
+            
             OctreeNode xyz = new OctreeNode(); //+++
             xyz.worldPosition = new DVector3(node.worldPosition.x + node.size / 4f, node.worldPosition.y + node.size / 4f, node.worldPosition.z + node.size / 4f);
             xyz.size = node.size / 2;
@@ -208,42 +210,42 @@ public class NBodyOriginator : MonoBehaviour
             
             if (xyz.containedBodies.Count > 0)
             {
-                BuildOctree(xyz);
+                BuildOctree(xyz, recursionDepth);
             }
                 
             if (xNegYz.containedBodies.Count > 0)
             {
-                BuildOctree(xNegYz);
+                BuildOctree(xNegYz, recursionDepth);
             }
                 
             if (negXyz.containedBodies.Count > 0)
             {
-                BuildOctree(negXyz);
+                BuildOctree(negXyz, recursionDepth);
             }
                 
             if (negXNegYz.containedBodies.Count > 0)
             {
-                BuildOctree(negXNegYz);
+                BuildOctree(negXNegYz, recursionDepth);
             }
                 
             if (xyNegZ.containedBodies.Count > 0)
             {
-                BuildOctree(xyNegZ);
+                BuildOctree(xyNegZ, recursionDepth);
             }
                 
             if (xNegYNegZ.containedBodies.Count > 0)
             {
-                BuildOctree(xNegYNegZ);
+                BuildOctree(xNegYNegZ, recursionDepth);
             }
                 
             if (negXyNegZ.containedBodies.Count > 0)
             {
-                BuildOctree(negXyNegZ);
+                BuildOctree(negXyNegZ, recursionDepth);
             }
                 
             if (negXNegYNegZ.containedBodies.Count > 0)
             {
-                BuildOctree(negXNegYNegZ);
+                BuildOctree(negXNegYNegZ, recursionDepth);
             }
             
             node.centerOfMass = DVector3.zero;
