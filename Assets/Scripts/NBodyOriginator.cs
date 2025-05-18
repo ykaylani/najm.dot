@@ -57,7 +57,7 @@ public class NBodyOriginator : MonoBehaviour
             Vector3 resultantForce = CalculateSubtreeForce(body, octreeOriginator, openingAngleCriterion);
             
             Vector3 newAcceleration = resultantForce / body.mass;
-            Vector3 newVelocity = body.currentVelocity + + 0.5f * (body.currentAcceleration + newAcceleration) * simulationTimestep;
+            Vector3 newVelocity = body.currentVelocity + 0.5f * (body.currentAcceleration + newAcceleration) * simulationTimestep;
 
             body.currentAcceleration = newAcceleration;
             body.currentVelocity = newVelocity;
