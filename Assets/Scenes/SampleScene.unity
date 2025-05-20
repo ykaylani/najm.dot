@@ -169,7 +169,7 @@ MonoBehaviour:
     z: 0
   mass: 4.86732e+24
   initialVelocity:
-    x: 1
+    x: -1
     y: 0
     z: 0
 --- !u!135 &336292749
@@ -483,9 +483,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   distMultiplier: 1000000000
-  simulationBounds: 1000
   simulationTimestep: 0.02
-  openingAngleCriterion: 0.10000000149011612
+  openingAngleCriterion: 0.5
+  adaptiveSimulationBounds: 0
+  boundsPadding: 10
+  simulationBounds: 1000
 --- !u!4 &1196126445
 Transform:
   m_ObjectHideFlags: 0
@@ -551,7 +553,7 @@ MonoBehaviour:
     z: 0
   mass: 3.301e+23
   initialVelocity:
-    x: 1
+    x: -1
     y: 0
     z: 0
 --- !u!135 &1849465522
@@ -710,8 +712,8 @@ Light:
   serializedVersion: 11
   m_Type: 2
   m_Color: {r: 1, g: 0.42050022, b: 0, a: 1}
-  m_Intensity: 50000
-  m_Range: 250
+  m_Intensity: 5000
+  m_Range: 220
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -814,7 +816,7 @@ MonoBehaviour:
     z: 0
   mass: 5.972e+24
   initialVelocity:
-    x: 1
+    x: -1
     y: 0
     z: 0
 --- !u!135 &2127970473
