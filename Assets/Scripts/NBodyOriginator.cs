@@ -16,19 +16,22 @@ public struct OctreeNode
 
 public class NBodyOriginator : MonoBehaviour    
 {
-    public double gravitationalConstant = 6.67e-11f;
-    public double distMultiplier = 1e9f; // 1 billion times longer
-
-    public double simulationBounds = 700f;
     
+    [Header("General Simulation Settings")]
+    
+    [Tooltip("Simulation's Distance Scaling. The default is 1 billion, meaning that every 1 unity meter will amount to 1 billion simulation meters.")]public double distMultiplier = 1e9;
+    [Tooltip("Simulation's Bounds in Unity (Meters).")]public double simulationBounds = 500;
+    [Tooltip("How fast the simulation's step is. Default value is default 'Fixed Timestep' for FixedUpdate in Project Settings > Time.")]public double simulationTimestep = 0.02;
+    
+    [Header("Barnes-Hut")]
+    
+    [Tooltip("The s/d criterion for barnes-hut to determine if it should use the approximation of an octant or compute each body. Lower Values make it more accurate and higher values make it more performant.")]
+    [Range(0, 1)]public double openingAngleCriterion = 0.5;
+    
+    private const double gravitationalConstant = 6.67e-11;
+    private List<OctreeNode> nodes = new List<OctreeNode>();
     private List<NBody> bodies;
-
-    //barnes-hut
-    [HideInInspector] public List<OctreeNode> nodes = new List<OctreeNode>();
     private OctreeNode octreeOriginator;
- 
-    public double openingAngleCriterion = 0.3f;
-    public double simulationTimestep;
 
     void Start()
     {

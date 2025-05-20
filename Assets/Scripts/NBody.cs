@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class NBody : MonoBehaviour
 {
@@ -7,16 +8,15 @@ public class NBody : MonoBehaviour
     [HideInInspector]public DVector3 currentPosition;
     
     [HideInInspector]public DVector3 predictedPosition;
-    
-    public double mass = 5.972e24f; // Earth
-    
-    public DVector3 impulse;
+
+    [Tooltip("Body's Mass in kilograms.")] public double mass = 5.972e24; // Earth mass default
+    [Tooltip("Initial Velocity of Body")] public DVector3 initialVelocity;
     
     private void Start()
     {
         
         currentPosition = gameObject.transform.position;
-        currentVelocity = impulse;
+        currentVelocity = initialVelocity;
         currentAcceleration = DVector3.zero;
     }
 
