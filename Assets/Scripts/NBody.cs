@@ -14,7 +14,6 @@ public class NBody : MonoBehaviour
     
     private void Start()
     {
-        
         currentPosition = gameObject.transform.position;
         currentVelocity = initialVelocity;
         currentAcceleration = DVector3.zero;

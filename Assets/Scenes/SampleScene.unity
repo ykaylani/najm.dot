@@ -133,7 +133,7 @@ GameObject:
   - component: {fileID: 336292749}
   - component: {fileID: 336292748}
   m_Layer: 0
-  m_Name: Body1
+  m_Name: Venus
   m_TagString: N Body
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -167,8 +167,8 @@ MonoBehaviour:
     x: 0
     y: 0
     z: 0
-  mass: 5.972e+24
-  impulse:
+  mass: 4.86732e+24
+  initialVelocity:
     x: 1
     y: 0
     z: 0
@@ -254,8 +254,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 336292747}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 150}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 108.8}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -275,7 +275,7 @@ GameObject:
   - component: {fileID: 466824826}
   - component: {fileID: 466824825}
   m_Layer: 0
-  m_Name: Body4
+  m_Name: Sun
   m_TagString: N Body
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -310,7 +310,7 @@ MonoBehaviour:
     y: 0
     z: 0
   mass: 1.9891e+30
-  impulse:
+  initialVelocity:
     x: 0
     y: 0
     z: 0
@@ -482,11 +482,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb3cfbbf65204af46ba87d6362f93366, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gravitationalConstant: 0.0000000000667
   distMultiplier: 1000000000
-  simulationBounds: 500
-  openingAngleCriterion: 0.5
+  simulationBounds: 1000
   simulationTimestep: 0.02
+  openingAngleCriterion: 0.10000000149011612
 --- !u!4 &1196126445
 Transform:
   m_ObjectHideFlags: 0
@@ -516,7 +515,7 @@ GameObject:
   - component: {fileID: 1849465522}
   - component: {fileID: 1849465521}
   m_Layer: 0
-  m_Name: Body3
+  m_Name: Mercury
   m_TagString: N Body
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -550,8 +549,8 @@ MonoBehaviour:
     x: 0
     y: 0
     z: 0
-  mass: 5.972e+24
-  impulse:
+  mass: 3.301e+23
+  initialVelocity:
     x: 1
     y: 0
     z: 0
@@ -638,7 +637,7 @@ Transform:
   m_GameObject: {fileID: 1849465520}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 123}
+  m_LocalPosition: {x: 0, y: 0, z: 51}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -779,7 +778,7 @@ GameObject:
   - component: {fileID: 2127970473}
   - component: {fileID: 2127970472}
   m_Layer: 0
-  m_Name: Body2
+  m_Name: Earth
   m_TagString: N Body
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -814,7 +813,7 @@ MonoBehaviour:
     y: 0
     z: 0
   mass: 5.972e+24
-  impulse:
+  initialVelocity:
     x: 1
     y: 0
     z: 0
@@ -901,7 +900,7 @@ Transform:
   m_GameObject: {fileID: 2127970471}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 200}
+  m_LocalPosition: {x: 0, y: 0, z: 151}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -912,8 +911,8 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1196126445}
-  - {fileID: 336292752}
   - {fileID: 2127970476}
   - {fileID: 1849465525}
+  - {fileID: 336292752}
   - {fileID: 466824829}
   - {fileID: 567752693}
