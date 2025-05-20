@@ -76,3 +76,4 @@ Bounds
 
 [Barnes-Hut Algorithm Documentation on arborjs.org](https://arborjs.org/docs/barnes-hut) <br>
 [Serway, R. A., & Faughn, J. S. HMH Physics: Student Edition 2017](https://www.amazon.com/Hmh-Physics-Raymond-Ph-D-Serway/dp/0544817737/ref=sr_1_1?crid=3GP9HK833QZHZ&dib=eyJ2IjoiMSJ9.xnCjaAhU1VPa4l1mS96RoP3XsfSu9nxTdhnTNCWF6QUaMJYwN0QNaB1ABuNd4A5j571R8uZnRfqs6a3nzAy1j7J9L1OHGrk6tNSdWVLp7BlsByVX8BXjarmj4nHKWERoZ93oRMOv3JImF1bFQj9AlqEUhh4cvFRxdk0pZS7mYug.tR8r5-vapDorupoqTJktYwHwzhx143McnFvlMh_-cIQ&dib_tag=se&keywords=HMH+Physics%3A+Student+Edition+2017.&qid=1747758685&sprefix=hmh+physics+student+edition+2017.%2Caps%2C241&sr=8-1)
+[Arcane Algorithm Archive's Verlet Integration Doncumentation](https://www.algorithm-archive.org/contents/verlet_integration/verlet_integration.html)
