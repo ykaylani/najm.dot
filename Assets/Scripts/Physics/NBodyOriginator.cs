@@ -16,19 +16,27 @@ public struct OctreeNode
 
 public class NBodyOriginator : MonoBehaviour    
 {
-    public double gravitationalConstant = 6.67e-11f;
-    public double distMultiplier = 1e9f; // 1 billion times longer
-
-    public double simulationBounds = 700f;
     
+    [Header("General Simulation Settings")]
+    
+    [Tooltip("Simulation's Distance Scaling. The default is 1 billion, meaning that every 1 unity meter will amount to 1 billion simulation meters.")]public double distMultiplier = 1e9;
+    [Tooltip("How fast the simulation's step is. Default value is default 'Fixed Timestep' for FixedUpdate in Project Settings > Time.")]public double simulationTimestep = 0.02;
+    
+    [Header("Barnes-Hut")]
+    
+    [Tooltip("The s/d criterion for barnes-hut to determine if it should use the approximation of an octant or compute each body. Lower Values make it more accurate and higher values make it more performant.")]
+    [Range(0, 1)]public double openingAngleCriterion = 0.5;
+    
+    [Header("Bounds")]
+    
+    [Tooltip("If simulation bounds will always try to contain all bodies (This can be problematic if a body is launched due to gravitational singularity, so I recommend keeping this off.)")]public bool adaptiveSimulationBounds = false;
+    [Tooltip("Padding added to the simulation bounds. Ensures objects remain comfortably within the octree's root node, avoiding boundary-related errors.")] public double boundsPadding = 10;
+    [Tooltip("Simulation's Bounds in Unity (Meters).")][HideInInspector]public double simulationBounds = 1000;
+    
+    private const double gravitationalConstant = 6.67e-11;
+    private List<OctreeNode> nodes = new List<OctreeNode>();
     private List<NBody> bodies;
-
-    //barnes-hut
-    [HideInInspector] public List<OctreeNode> nodes = new List<OctreeNode>();
     private OctreeNode octreeOriginator;
- 
-    public double openingAngleCriterion = 0.3f;
-    public double simulationTimestep;
 
     void Start()
     {
@@ -36,7 +44,7 @@ public class NBodyOriginator : MonoBehaviour
         octreeOriginator.containedBodies = FindObjectsByType<NBody>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).ToList();
         
         octreeOriginator.worldPosition = DVector3.zero;
-        octreeOriginator.size = simulationBounds;
+        octreeOriginator.size = simulationBounds + boundsPadding;
         octreeOriginator.octreeChildren = new List<OctreeNode>();
     }
 
@@ -45,9 +53,26 @@ public class NBodyOriginator : MonoBehaviour
         nodes.Clear();
         nodes.Add(octreeOriginator);
         
+        DVector3 farthestBody = DVector3.zero;
+        
         foreach (NBody body in bodies)
         {
             body.predictedPosition = body.currentPosition + body.currentVelocity * simulationTimestep + (body.currentAcceleration * (simulationTimestep * simulationTimestep)) * 0.5;
+
+            if (adaptiveSimulationBounds)
+            {
+                if (body.predictedPosition.magnitude > farthestBody.magnitude)
+                {
+                    farthestBody = body.predictedPosition;
+                }
+            }
+        }
+
+        if (adaptiveSimulationBounds)
+        {
+            simulationBounds = farthestBody.magnitude;
+            octreeOriginator.size = simulationBounds + boundsPadding;
+            print(simulationBounds);
         }
         
         BuildOctree(octreeOriginator, 0);
