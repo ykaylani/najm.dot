@@ -1,22 +1,18 @@
+# Version 0.2 Changes
 
-#**Version 0.1 Changes**
+### Added / Changed
 
-###**Key Changes**
+- Adaptive Simulaton Bounds
+- Unity Custom Editor and Readability Changes  
 
->Added Barnes-Hut Algorithm<br>
->Realistic Masses, Forces and Distances<br>
->Simulation in Realtime<br>
->Increased Precision by switching from Floating-point to Double-precision
+# Version 0.1 Changes
 
-###**Bug Fixes**
+### Added / Changed
 
->Fixed Body Ejection caused by Gravitational Singularity<br>
->Increased Simulation Smoothness<br>
+- Added Barnes-Hut Algorithm  
+- Implemented realistic scaling for mass, force, and distance units  
+- Increased Precision by switching from Floating-point to Double-precision
 
-###**Future Improvements**
+### Bug Fixes
 
->Adaptive Simulation Bounds<br>
->Adjustable Simulation speed separate from Unity's Built-in TimeScale<br>
->Adaptive Timestepping<br>
->Higher-Order Integrator (Fourth Order Runge-Kutta)<br>
->Unity DOTS (Jobs, ECS) Integration<br>
+- Tweaked Simulation timesteps for smoother integration
