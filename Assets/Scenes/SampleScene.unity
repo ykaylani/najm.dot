@@ -553,7 +553,7 @@ MonoBehaviour:
     z: 0
   mass: 3.301e+23
   initialVelocity:
-    x: -1
+    x: -1.25
     y: 0
     z: 0
 --- !u!135 &1849465522
