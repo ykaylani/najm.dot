@@ -4,31 +4,77 @@ using UnityEditor;
 [CanEditMultipleObjects]
 public class OriginatorEditor : Editor
 {
+
     private SerializedProperty distMultiplier;
-    private SerializedProperty simTimestep;
+    private SerializedProperty simulationTimestep;
+
+    private SerializedProperty openingAngleCriterion;
     
-    private SerializedProperty toggleAdaptiveSimulationBounds;
-    private SerializedProperty simulationBoundsValue;
+    private SerializedProperty adaptiveSimulationBounds;
+    private SerializedProperty boundsPadding;
+    private SerializedProperty simulationBounds;
+
+    private SerializedProperty orbitTrailMaterial;
+    private SerializedProperty visualizationTimestep;
+
+    private bool generalSettings;
+    private bool barnesHutSettings;
+    private bool boundsSettings;
+    private bool visualizationSettings;
 
     private void OnEnable()
     {
         distMultiplier = serializedObject.FindProperty("distMultiplier");
-        simTimestep = serializedObject.FindProperty("simulationTimestep");
+        simulationTimestep = serializedObject.FindProperty("simulationTimestep");
         
-        toggleAdaptiveSimulationBounds = serializedObject.FindProperty("adaptiveSimulationBounds");
-        simulationBoundsValue = serializedObject.FindProperty("simulationBounds");
+        openingAngleCriterion = serializedObject.FindProperty("openingAngleCriterion");
+        
+        adaptiveSimulationBounds = serializedObject.FindProperty("adaptiveSimulationBounds");
+        boundsPadding = serializedObject.FindProperty("boundsPadding");
+        simulationBounds = serializedObject.FindProperty("simulationBounds");
+        
+        orbitTrailMaterial = serializedObject.FindProperty("orbitTrailMaterial");
+        visualizationTimestep = serializedObject.FindProperty("visualizationTimestep");
     }
     
     public override void OnInspectorGUI()
     {
-        base.OnInspectorGUI();
         serializedObject.Update();
         
-        if (!toggleAdaptiveSimulationBounds.boolValue)
+        generalSettings = EditorGUILayout.BeginFoldoutHeaderGroup(generalSettings, "General");
+        if (generalSettings)
         {
-            EditorGUILayout.PropertyField(simulationBoundsValue);
+            EditorGUILayout.PropertyField(distMultiplier);
+            EditorGUILayout.PropertyField(simulationTimestep);
         }
+        EditorGUILayout.EndFoldoutHeaderGroup();
         
+        barnesHutSettings = EditorGUILayout.BeginFoldoutHeaderGroup(barnesHutSettings, "Barnes-Hut");
+        if (barnesHutSettings)
+        {
+            EditorGUILayout.PropertyField(openingAngleCriterion);
+        }
+        EditorGUILayout.EndFoldoutHeaderGroup();
+        
+        boundsSettings = EditorGUILayout.BeginFoldoutHeaderGroup(boundsSettings, "Bounds");
+        if (boundsSettings)
+        {
+            EditorGUILayout.PropertyField(adaptiveSimulationBounds);
+            
+            if (!adaptiveSimulationBounds.boolValue)
+            {
+                EditorGUILayout.PropertyField(simulationBounds);
+            }
+        }
+        EditorGUILayout.EndFoldoutHeaderGroup();
+        
+        visualizationSettings = EditorGUILayout.BeginFoldoutHeaderGroup(visualizationSettings, "Visualization");
+        if (visualizationSettings)
+        {
+            EditorGUILayout.PropertyField(orbitTrailMaterial);
+            EditorGUILayout.PropertyField(visualizationTimestep);
+        }
+
         serializedObject.ApplyModifiedProperties();
     }
 }

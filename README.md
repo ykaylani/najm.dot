@@ -1,11 +1,13 @@
 # unity-n-body
-N-Body Simulation implemented in Unity currently in development.<br>
+N-Body Simulation implemented in Unity currently in development.  
 It is an experimental project of mine that i expect to keep updating for about the next 2 years.
 ## Features
-- Gravitational N-Body Simulation<br>
-- Double Precision Mathematics<br>
-- Barnes-Hut Algorithm with Adaptive (and static) Simulation Bounds<br>
-- Custom Unity Inspector UI<br>
+- Gravitational N-Body Simulation  
+- Double Precision Mathematics  
+- Barnes-Hut Algorithm with Adaptive (and static) Simulation Bounds    
+- Custom Unity Inspector UI  
+- Keplerian Orbits  
+- Orbit Visualization  
 ## Setup
 
 <h4>Firstly, clone this repository: </h4>
@@ -53,10 +55,27 @@ Bounds
 - Bounds Padding is a extra distance added to the simulation bounds for extra stability with Adaptive Simulation Bounds. Generally not needed on static simuation bounds.
 - Simulation Bounds only appears when Adaptive Simulation Bounds is toggled off, and it lets you define a specific domain for your simulation. If bodies go outside this range, physics calculations may not be accurate.
 
+Visualization  
+- Orbit Trail Material is the material the orbit visualization will use
+- Vizualization Timestep is how much time it will take to update the visualization
+
 **NBody Properties**
 
+General
 - Mass is the mass of the object (in kg)... i don't know what else to say.
-- Initial Velocity is the velocity of the object at the beginning of the simulation.
+
+Initial Velocity Settings
+- Initial Velocity is the velocity of the object at the beginning of the simulation. This property is only visible If **Keplerian Orbits** is turned off. It is generally not recommended to use this, as it can cause unstable orbits and object flinging.  
+- Keplerian Orbits toggles whether of not orbits should be defined by orbital mechanics.  
+- Eccentricity defines the shape of the orbit (0 = circle, 0<x<1 = ellipse, 1 = parabolic (escape velocity), x > 1 = hyperbolic (also escape velocity)).  
+- Semimajor Axis defines the size of the orbit.  
+- True Anomaly is the current position of the body along it's path from the periapsis.  
+- the Ascending Node Longitude is the angle (in radians) from where the body will cross from going south to going north.  
+- the Inclination is the tilt of the orbit.  
+
+Visualization
+- Orbit Trails toggles the visibility of orbit trails.  
+- Orbit trail length defines the maximum number of previous visualization timesteps that can be displayed.  
 
 ## Technical Details
 
@@ -66,9 +85,9 @@ Bounds
 
 ## Roadmap
 
-- Make the simulation **NOT** tied to the origin of the world to help with integration into games (if that were to happen) and help with adaptive simulation bounds effectiveness.
+- Make the simulation **NOT** tied to the origin of the world to help with integration into games (if that were to happen) and help with adaptive simulation bounds' effectiveness.
 - Introducting Higher-Order Integrations like Fourth Order Runge-Kutta.
-- Visualization Improvements (Orbit trails, Body Scaling, Recording Data)
+- Data Recording for export
 - Adjustable Simulation Speed separate from Unity's TimeScale
 - Integration into Unity DOTS for performance.
 
@@ -76,4 +95,6 @@ Bounds
 
 [Barnes-Hut Algorithm Documentation on arborjs.org](https://arborjs.org/docs/barnes-hut) <br>
 [Serway, R. A., & Faughn, J. S. HMH Physics: Student Edition 2017](https://www.amazon.com/Hmh-Physics-Raymond-Ph-D-Serway/dp/0544817737/ref=sr_1_1?crid=3GP9HK833QZHZ&dib=eyJ2IjoiMSJ9.xnCjaAhU1VPa4l1mS96RoP3XsfSu9nxTdhnTNCWF6QUaMJYwN0QNaB1ABuNd4A5j571R8uZnRfqs6a3nzAy1j7J9L1OHGrk6tNSdWVLp7BlsByVX8BXjarmj4nHKWERoZ93oRMOv3JImF1bFQj9AlqEUhh4cvFRxdk0pZS7mYug.tR8r5-vapDorupoqTJktYwHwzhx143McnFvlMh_-cIQ&dib_tag=se&keywords=HMH+Physics%3A+Student+Edition+2017.&qid=1747758685&sprefix=hmh+physics+student+edition+2017.%2Caps%2C241&sr=8-1) <br>
-[Arcane Algorithm Archive's Verlet Integration Doncumentation](https://www.algorithm-archive.org/contents/verlet_integration/verlet_integration.html)
+[Arcane Algorithm Archive's Verlet Integration Documentation](https://www.algorithm-archive.org/contents/verlet_integration/verlet_integration.html)  
+[Orbital Mechanics - Wikipedia](https://en.wikipedia.org/wiki/Orbital_mechanics)  
+[Perifocal coordinate system - Wikipedia](https://en.wikipedia.org/wiki/Perifocal_coordinate_system)

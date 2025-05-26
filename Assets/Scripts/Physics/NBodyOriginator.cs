@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 
 public struct OctreeNode
 {
@@ -14,27 +15,29 @@ public struct OctreeNode
     public List<NBody> containedBodies;
 }
 
-public class NBodyOriginator : MonoBehaviour    
+public class NBodyOriginator : MonoBehaviour
 {
+
+    private double accumulatedVisualizationTime = 0;
     
-    [Header("General Simulation Settings")]
     
     [Tooltip("Simulation's Distance Scaling. The default is 1 billion, meaning that every 1 unity meter will amount to 1 billion simulation meters.")]public double distMultiplier = 1e9;
     [Tooltip("How fast the simulation's step is. Default value is default 'Fixed Timestep' for FixedUpdate in Project Settings > Time.")]public double simulationTimestep = 0.02;
     
-    [Header("Barnes-Hut")]
     
     [Tooltip("The s/d criterion for barnes-hut to determine if it should use the approximation of an octant or compute each body. Lower Values make it more accurate and higher values make it more performant.")]
     [Range(0, 1)]public double openingAngleCriterion = 0.5;
     
-    [Header("Bounds")]
     
-    [Tooltip("If simulation bounds will always try to contain all bodies (This can be problematic if a body is launched due to gravitational singularity, so I recommend keeping this off.)")]public bool adaptiveSimulationBounds = false;
+    [Tooltip("If simulation bounds will always try to contain all bodies (This can be problematic if a body is launched due to gravitational singularity, so I recommend keeping this off.)")]public bool adaptiveSimulationBounds;
     [Tooltip("Padding added to the simulation bounds. Ensures objects remain comfortably within the octree's root node, avoiding boundary-related errors.")] public double boundsPadding = 10;
     [Tooltip("Simulation's Bounds in Unity (Meters).")][HideInInspector]public double simulationBounds = 1000;
     
+    
+    [Tooltip("The material that will be used for Visualiztion of orbits (orbit trails).")] public Material orbitTrailMaterial;
+    [Tooltip("visualization update speed")] public double visualizationTimestep = 0.05;
+    
     private const double gravitationalConstant = 6.67e-11;
-    private List<OctreeNode> nodes = new List<OctreeNode>();
     private List<NBody> bodies;
     private OctreeNode octreeOriginator;
 
@@ -46,16 +49,115 @@ public class NBodyOriginator : MonoBehaviour
         octreeOriginator.worldPosition = DVector3.zero;
         octreeOriginator.size = simulationBounds + boundsPadding;
         octreeOriginator.octreeChildren = new List<OctreeNode>();
+
+        foreach (NBody body in bodies)
+        {
+            body.initialVelocity = CalculateInitialVelocity(body);
+            body.currentVelocity = body.initialVelocity;
+
+            if (body.orbitTrails)
+            {
+                if (!body.TryGetComponent(out LineRenderer lRenderer))
+                {
+                    lRenderer = body.AddComponent<LineRenderer>();
+                    body.lineRenderer = lRenderer;
+                    
+                    lRenderer.useWorldSpace = true;
+                    lRenderer.positionCount = 0;
+                }
+
+                if (orbitTrailMaterial)
+                {
+                    lRenderer.material = orbitTrailMaterial;
+                }
+                else
+                {
+                    Debug.LogWarning("Orbit trail material is missing!");
+                }
+            }
+        }
     }
 
     void FixedUpdate()
     {
-        nodes.Clear();
-        nodes.Add(octreeOriginator);
+        DVector3 farthestBody = PredictPositions(bodies);
+        SimulationBoundsUpdate(farthestBody);
         
+        octreeOriginator = new OctreeNode();
+        octreeOriginator.worldPosition = DVector3.zero;
+        octreeOriginator.size = simulationBounds + boundsPadding;
+        octreeOriginator.octreeChildren = new List<OctreeNode>();
+        octreeOriginator.containedBodies = FindObjectsByType<NBody>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).ToList();
+        
+        BuildOctree(octreeOriginator, 0);
+        ExecuteForceCalculations(bodies);
+    }
+
+    void Update()
+    {
+        accumulatedVisualizationTime += Time.deltaTime;
+
+        if (accumulatedVisualizationTime >= visualizationTimestep)
+        {
+            foreach (NBody body in bodies)
+            {
+                TrailVisualization(body);
+            }
+            accumulatedVisualizationTime = 0;
+        }
+    }
+
+    //setting initial velocities using keplerian orbital elements
+    DVector3 CalculateInitialVelocity(NBody body)
+    {
+        if (body.keplerianOrbits)
+        {
+            if (!body.centralBody)
+            {
+                Debug.LogWarning($"{body} has No Central Body Assigned to Orbit around! If it is the central body, please turn off 'Keplerian Orbits'.");
+                return body.initialVelocity;
+            }
+            
+            double standardGravitationalParameter = (gravitationalConstant * body.centralBody.mass) / distMultiplier;
+
+            double angularMomentumMagnitude = System.Math.Sqrt(standardGravitationalParameter * body.semimajorAxis * (1 - System.Math.Pow(body.eccentricity, 2)));
+
+            DVector3 perifocalVelocity = new DVector3(
+                -(standardGravitationalParameter / angularMomentumMagnitude) * System.Math.Sin(body.trueAnomaly),
+                standardGravitationalParameter / angularMomentumMagnitude * (body.eccentricity + System.Math.Cos(body.trueAnomaly)),
+                0
+            );
+
+            DVector3 periapsisRotation = new DVector3(
+                perifocalVelocity.x * System.Math.Cos(body.argumentOfPeriapsis) - perifocalVelocity.y * System.Math.Sin(body.argumentOfPeriapsis),
+                perifocalVelocity.x * System.Math.Sin(body.argumentOfPeriapsis) + perifocalVelocity.y * System.Math.Cos(body.argumentOfPeriapsis),
+                perifocalVelocity.z
+            );
+
+            DVector3 inclinationRotation = new DVector3(
+                periapsisRotation.x,
+                periapsisRotation.y * System.Math.Cos(body.inclination) - periapsisRotation.z * System.Math.Sin(body.inclination), 
+                periapsisRotation.y * System.Math.Sin(body.inclination) + periapsisRotation.z * System.Math.Cos(body.inclination)
+            );
+
+            DVector3 ascendingNodeRotation = new DVector3(
+                inclinationRotation.x * System.Math.Cos(body.ascendingNodeLongitude) - inclinationRotation.y * System.Math.Sin(body.ascendingNodeLongitude),
+                inclinationRotation.x * System.Math.Sin(body.ascendingNodeLongitude) + inclinationRotation.y * System.Math.Cos(body.ascendingNodeLongitude),
+                inclinationRotation.z
+            );
+            
+            return ascendingNodeRotation;
+        }
+        
+        return body.initialVelocity;
+    }
+
+    //this also includes calculating the farthest body for the adaptive simulation bounds to decrease the amount of looping required
+    DVector3 PredictPositions(List<NBody> lBodies)
+    {
         DVector3 farthestBody = DVector3.zero;
         
-        foreach (NBody body in bodies)
+        foreach (NBody body in lBodies)
         {
             body.predictedPosition = body.currentPosition + body.currentVelocity * simulationTimestep + (body.currentAcceleration * (simulationTimestep * simulationTimestep)) * 0.5;
 
@@ -67,26 +169,19 @@ public class NBodyOriginator : MonoBehaviour
                 }
             }
         }
+        
+        return farthestBody;
+    }
 
+    void SimulationBoundsUpdate(DVector3 farthestBody)
+    {
         if (adaptiveSimulationBounds)
         {
             simulationBounds = farthestBody.magnitude;
             octreeOriginator.size = simulationBounds + boundsPadding;
             print(simulationBounds);
         }
-        
-        BuildOctree(octreeOriginator, 0);
 
-        foreach (NBody body in bodies)
-        {
-            DVector3 resultantForce = CalculateSubtreeForce(body, octreeOriginator, openingAngleCriterion);
-            DVector3 newAcceleration = resultantForce / body.mass;
-            DVector3 newVelocity = body.currentVelocity + (body.currentAcceleration + newAcceleration) * 0.5 * simulationTimestep;
-
-            body.currentAcceleration = newAcceleration;
-            body.currentVelocity = newVelocity;
-            body.currentPosition = body.predictedPosition;
-        }
     }
 
     //creates octree for barnes-hut algorithm
@@ -152,15 +247,6 @@ public class NBodyOriginator : MonoBehaviour
             node.octreeChildren.Add(xNegYNegZ);
             node.octreeChildren.Add(negXyNegZ);
             node.octreeChildren.Add(negXNegYNegZ);
-            
-            nodes.Add(xyz);
-            nodes.Add(xNegYz);
-            nodes.Add(negXyz);
-            nodes.Add(negXNegYz);
-            nodes.Add(xyNegZ);
-            nodes.Add(xNegYNegZ);
-            nodes.Add(negXyNegZ);
-            nodes.Add(negXNegYNegZ);
 
             for (int j = node.containedBodies.Count - 1; j >= 0; j--)
             {
@@ -293,6 +379,9 @@ public class NBodyOriginator : MonoBehaviour
             node.octreeChildren = new List<OctreeNode>();
             node.octreeChildren.Clear();
             
+            node.centerOfMass = DVector3.zero;
+            node.totalMass = 0;
+            
             for (int i = 0; i < node.containedBodies.Count; i++)
             {
                 node.centerOfMass += node.containedBodies[i].predictedPosition * node.containedBodies[i].mass;
@@ -344,6 +433,36 @@ public class NBodyOriginator : MonoBehaviour
         }
 
         return resultant;
+    }
+    
+    void ExecuteForceCalculations(List<NBody> nBodies)
+    {
+        foreach (NBody body in nBodies)
+        {
+            DVector3 resultantForce = CalculateSubtreeForce(body, octreeOriginator, openingAngleCriterion);
+            DVector3 newAcceleration = resultantForce / body.mass;
+            DVector3 newVelocity = body.currentVelocity + (body.currentAcceleration + newAcceleration) * 0.5 * simulationTimestep;
+
+            body.currentAcceleration = newAcceleration;
+            body.currentVelocity = newVelocity;
+            body.currentPosition = body.predictedPosition;
+        }
+    }
+
+    void TrailVisualization(NBody body)
+    {
+        if (body.orbitTrails)
+        {
+            body.orbitPoints.Add(body.predictedPosition);
+
+            if (body.orbitPoints.Count > body.orbitTrailLength)
+            {
+                body.orbitPoints.RemoveAt(0);
+            }
+        
+            body.lineRenderer.positionCount = body.orbitPoints.Count;
+            body.lineRenderer.SetPositions(body.orbitPoints.ToArray());
+        }
     }
     
 }
