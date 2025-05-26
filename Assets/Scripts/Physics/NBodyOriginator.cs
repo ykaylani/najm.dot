@@ -15,24 +15,27 @@ public struct OctreeNode
     public List<NBody> containedBodies;
 }
 
-public class NBodyOriginator : MonoBehaviour    
+public class NBodyOriginator : MonoBehaviour
 {
+
+    private double accumulatedVisualizationTime = 0;
     
-    [Header("General Simulation Settings")]
     
     [Tooltip("Simulation's Distance Scaling. The default is 1 billion, meaning that every 1 unity meter will amount to 1 billion simulation meters.")]public double distMultiplier = 1e9;
     [Tooltip("How fast the simulation's step is. Default value is default 'Fixed Timestep' for FixedUpdate in Project Settings > Time.")]public double simulationTimestep = 0.02;
     
-    [Header("Barnes-Hut")]
     
     [Tooltip("The s/d criterion for barnes-hut to determine if it should use the approximation of an octant or compute each body. Lower Values make it more accurate and higher values make it more performant.")]
     [Range(0, 1)]public double openingAngleCriterion = 0.5;
     
-    [Header("Bounds")]
     
-    [Tooltip("If simulation bounds will always try to contain all bodies (This can be problematic if a body is launched due to gravitational singularity, so I recommend keeping this off.)")]public bool adaptiveSimulationBounds = false;
+    [Tooltip("If simulation bounds will always try to contain all bodies (This can be problematic if a body is launched due to gravitational singularity, so I recommend keeping this off.)")]public bool adaptiveSimulationBounds;
     [Tooltip("Padding added to the simulation bounds. Ensures objects remain comfortably within the octree's root node, avoiding boundary-related errors.")] public double boundsPadding = 10;
     [Tooltip("Simulation's Bounds in Unity (Meters).")][HideInInspector]public double simulationBounds = 1000;
+    
+    
+    [Tooltip("The material that will be used for Visualiztion of orbits (orbit trails).")] public Material orbitTrailMaterial;
+    [Tooltip("visualization update speed")] public double visualizationTimestep = 0.05;
     
     private const double gravitationalConstant = 6.67e-11;
     private List<NBody> bodies;
@@ -51,6 +54,27 @@ public class NBodyOriginator : MonoBehaviour
         {
             body.initialVelocity = CalculateInitialVelocity(body);
             body.currentVelocity = body.initialVelocity;
+
+            if (body.orbitTrails)
+            {
+                if (!body.TryGetComponent(out LineRenderer lRenderer))
+                {
+                    lRenderer = body.AddComponent<LineRenderer>();
+                    body.lineRenderer = lRenderer;
+                    
+                    lRenderer.useWorldSpace = true;
+                    lRenderer.positionCount = 0;
+                }
+
+                if (orbitTrailMaterial)
+                {
+                    lRenderer.material = orbitTrailMaterial;
+                }
+                else
+                {
+                    Debug.LogWarning("Orbit trail material is missing!");
+                }
+            }
         }
     }
 
@@ -67,6 +91,20 @@ public class NBodyOriginator : MonoBehaviour
         
         BuildOctree(octreeOriginator, 0);
         ExecuteForceCalculations(bodies);
+    }
+
+    void Update()
+    {
+        accumulatedVisualizationTime += Time.deltaTime;
+
+        if (accumulatedVisualizationTime >= visualizationTimestep)
+        {
+            foreach (NBody body in bodies)
+            {
+                TrailVisualization(body);
+            }
+            accumulatedVisualizationTime = 0;
+        }
     }
 
     //setting initial velocities using keplerian orbital elements
@@ -408,6 +446,22 @@ public class NBodyOriginator : MonoBehaviour
             body.currentAcceleration = newAcceleration;
             body.currentVelocity = newVelocity;
             body.currentPosition = body.predictedPosition;
+        }
+    }
+
+    void TrailVisualization(NBody body)
+    {
+        if (body.orbitTrails)
+        {
+            body.orbitPoints.Add(body.predictedPosition);
+
+            if (body.orbitPoints.Count > body.orbitTrailLength)
+            {
+                body.orbitPoints.RemoveAt(0);
+            }
+        
+            body.lineRenderer.positionCount = body.orbitPoints.Count;
+            body.lineRenderer.SetPositions(body.orbitPoints.ToArray());
         }
     }
     

@@ -4,6 +4,8 @@ using UnityEditor;
 [CanEditMultipleObjects]
 public class NBodyEditor : Editor
 {
+    private SerializedProperty mass;
+    
     private SerializedProperty toggleKeplerianOrbits;
     private SerializedProperty initialVelocity;
     
@@ -14,9 +16,18 @@ public class NBodyEditor : Editor
     private SerializedProperty argumentOfPeriapsis;
     private SerializedProperty ascendingNodeLongitude;
     private SerializedProperty inclination;
+
+    private SerializedProperty orbitTrails;
+    private SerializedProperty orbitTrailLength;
+
+    private bool generalSettings;
+    private bool initialVelocitySettings;
+    private bool visualizationSettings;
     
     private void OnEnable()
     {
+        mass = serializedObject.FindProperty("mass");
+        
         toggleKeplerianOrbits = serializedObject.FindProperty("keplerianOrbits");
         initialVelocity = serializedObject.FindProperty("initialVelocity");
         
@@ -27,27 +38,61 @@ public class NBodyEditor : Editor
         argumentOfPeriapsis = serializedObject.FindProperty("argumentOfPeriapsis");
         ascendingNodeLongitude = serializedObject.FindProperty("ascendingNodeLongitude");
         inclination = serializedObject.FindProperty("inclination");
+        
+        orbitTrails = serializedObject.FindProperty("orbitTrails");
+        orbitTrailLength = serializedObject.FindProperty("orbitTrailLength");
     }
     
     public override void OnInspectorGUI()
     {
-        base.OnInspectorGUI();
         serializedObject.Update();
+        
+        generalSettings = EditorGUILayout.BeginFoldoutHeaderGroup(generalSettings, "General");
+        
+        if (generalSettings)
+        {
+            EditorGUILayout.PropertyField(mass);
+        }
+        
+        EditorGUILayout.EndFoldoutHeaderGroup();
+        
+        initialVelocitySettings = EditorGUILayout.BeginFoldoutHeaderGroup(initialVelocitySettings, "Initial Velocity Settings");
+        
+        if (initialVelocitySettings)
+        {
+            if (!toggleKeplerianOrbits.boolValue)
+            {
+                EditorGUILayout.PropertyField(toggleKeplerianOrbits);
+                EditorGUILayout.PropertyField(initialVelocity);
+            }
+            else
+            {
+                EditorGUILayout.PropertyField(toggleKeplerianOrbits);
+                EditorGUILayout.PropertyField(centralBody);
+                EditorGUILayout.PropertyField(eccentricity);
+                EditorGUILayout.PropertyField(semimajorAxis);
+                EditorGUILayout.PropertyField(trueAnomaly);
+                EditorGUILayout.PropertyField(argumentOfPeriapsis);
+                EditorGUILayout.PropertyField(ascendingNodeLongitude);
+                EditorGUILayout.PropertyField(inclination);
+            }
+        }
+        
+        EditorGUILayout.EndFoldoutHeaderGroup();
+        
+        visualizationSettings = EditorGUILayout.BeginFoldoutHeaderGroup(visualizationSettings, "Visualization");
 
-        if (!toggleKeplerianOrbits.boolValue)
+        if (visualizationSettings)
         {
-            EditorGUILayout.PropertyField(initialVelocity);
+            EditorGUILayout.PropertyField(orbitTrails);
+
+            if (orbitTrails.boolValue)
+            {
+                EditorGUILayout.PropertyField(orbitTrailLength);
+            }
         }
-        else
-        {
-            EditorGUILayout.PropertyField(centralBody);
-            EditorGUILayout.PropertyField(eccentricity);
-            EditorGUILayout.PropertyField(semimajorAxis);
-            EditorGUILayout.PropertyField(trueAnomaly);
-            EditorGUILayout.PropertyField(argumentOfPeriapsis);
-            EditorGUILayout.PropertyField(ascendingNodeLongitude);
-            EditorGUILayout.PropertyField(inclination);
-        }
+        
+        EditorGUILayout.EndFoldoutHeaderGroup();
         
         serializedObject.ApplyModifiedProperties();
     }
