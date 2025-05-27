@@ -51,18 +51,19 @@ Barnes-Hut
 - the Opening Angle Criterion is the threshold that the Barnes-Hut algorithm will use to determine if it should use an approximation of mass or take the exact masses. values near 0 cause more accuracy but less prformance, and the opposite is true for values near 1. <br>
 
 Bounds
-- Adaptive Simulation bounds determines if the Simulation bounds will move to accomodate the bodies for accurate calculations with barnes-hut. As of Version 0.2.0, it is better to disable this as it can consume many resources if a body goes flying due to unforeseen bugs.
-- Bounds Padding is a extra distance added to the simulation bounds for extra stability with Adaptive Simulation Bounds. Generally not needed on static simuation bounds.
+- Adaptive Simulation bounds determines if the Simulation bounds will move to accomodate the bodies for accurate calculations with barnes-hut. As of Version 0.3.1, it is better to disable IF you are using basic initial velocities as they have to chance to fling bodies thousands of meters away, and that causes the bounds to try and follow them.
+- Bounds Padding is a extra distance added to the simulation bounds for extra stability with Adaptive Simulation Bounds. Generally not needed when using static simuation bounds.
 - Simulation Bounds only appears when Adaptive Simulation Bounds is toggled off, and it lets you define a specific domain for your simulation. If bodies go outside this range, physics calculations may not be accurate.
 
 Visualization  
-- Orbit Trail Material is the material the orbit visualization will use
-- Vizualization Timestep is how much time it will take to update the visualization
+- Orbit Trail Material is the material the orbit visualization will use. This will be used as the default for all trails, but individual materials can be set from the N-Bodies.
+- Orbit Width controls the width of the line that represents the orbit trail.
+- Vizualization Timestep is how much time it will take to update the visualization.
 
-**NBody Properties**
+**N-Body Properties**
 
 General
-- Mass is the mass of the object (in kg)... i don't know what else to say.
+- Mass is the mass of the object (in kg).
 
 Initial Velocity Settings
 - Initial Velocity is the velocity of the object at the beginning of the simulation. This property is only visible If **Keplerian Orbits** is turned off. It is generally not recommended to use this, as it can cause unstable orbits and object flinging.  
@@ -74,7 +75,8 @@ Initial Velocity Settings
 - the Inclination is the tilt of the orbit.  
 
 Visualization
-- Orbit Trails toggles the visibility of orbit trails.  
+- Orbit Trails toggles the visibility of orbit trails. This is currently not recommended for purely performance-based applications as it uses Unity's built-in LineRenderer, which can produce a ton of CPU overhead with many objects.  
+- Orbit Trail Material will be used to render the path. If the N-Body has this as empty, the simulation will fallback to the Originator's Orbit Trail Material.  
 - Orbit trail length defines the maximum number of previous visualization timesteps that can be displayed.  
 
 ## Technical Details
@@ -85,10 +87,14 @@ Visualization
 
 ## Roadmap
 
-- Make the simulation **NOT** tied to the origin of the world to help with integration into games (if that were to happen) and help with adaptive simulation bounds' effectiveness.
+The roadmap for this project in chronological order.
 - Introducting Higher-Order Integrations like Fourth Order Runge-Kutta.
-- Data Recording for export
-- Adjustable Simulation Speed separate from Unity's TimeScale
+- Object Pooling for the Barnes-Hut algorithm's octants to decrease GC pressure.
+- Make the simulation **NOT** tied to the origin of the world to help with integration into games (if that were to happen) and help with adaptive simulation bounds' effectiveness.
+- Custom Mesh Generation for visualization replacing LineRenderer as LineRenderer creates CPU overhead at scale.
+- Adjustable Simulation Speed separate from Unity's TimeScale.
+- Body Collisions for more stability.
+- Data Recording for export.
 - Integration into Unity DOTS for performance.
 
 ## Credits
