@@ -35,6 +35,7 @@ public class NBodyOriginator : MonoBehaviour
     
     
     [Tooltip("The material that will be used for Visualiztion of orbits (orbit trails).")] public Material orbitTrailMaterial;
+    [Tooltip("The width of the trail")] public float orbitWidth = 0.1f;
     [Tooltip("visualization update speed")] public double visualizationTimestep = 0.05;
     
     private const double gravitationalConstant = 6.67e-11;
@@ -44,7 +45,7 @@ public class NBodyOriginator : MonoBehaviour
     void Start()
     {
         bodies = FindObjectsByType<NBody>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).ToList();
-        octreeOriginator.containedBodies = FindObjectsByType<NBody>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).ToList();
+        octreeOriginator.containedBodies = bodies;
         
         octreeOriginator.worldPosition = DVector3.zero;
         octreeOriginator.size = simulationBounds + boundsPadding;
@@ -64,15 +65,28 @@ public class NBodyOriginator : MonoBehaviour
                     
                     lRenderer.useWorldSpace = true;
                     lRenderer.positionCount = 0;
-                }
-
-                if (orbitTrailMaterial)
-                {
-                    lRenderer.material = orbitTrailMaterial;
+                    lRenderer.startWidth = orbitWidth;
+                    lRenderer.endWidth = orbitWidth;
                 }
                 else
                 {
-                    Debug.LogWarning("Orbit trail material is missing!");
+                    Debug.LogWarning($"{body} already has a LineRenderer! Please remove the LineRenderer component from the body.");
+                }
+
+                if (body.orbitTrailMaterial)
+                {
+                    lRenderer.material = body.orbitTrailMaterial;
+                }
+                else
+                {
+                    if (orbitTrailMaterial)
+                    {
+                        lRenderer.material = orbitTrailMaterial;
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Orbit trail material is missing, and no material was assigned to {body}!");
+                    }
                 }
             }
         }
@@ -87,7 +101,7 @@ public class NBodyOriginator : MonoBehaviour
         octreeOriginator.worldPosition = DVector3.zero;
         octreeOriginator.size = simulationBounds + boundsPadding;
         octreeOriginator.octreeChildren = new List<OctreeNode>();
-        octreeOriginator.containedBodies = FindObjectsByType<NBody>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).ToList();
+        octreeOriginator.containedBodies = bodies;
         
         BuildOctree(octreeOriginator, 0);
         ExecuteForceCalculations(bodies);
@@ -377,8 +391,6 @@ public class NBodyOriginator : MonoBehaviour
         else
         {
             node.octreeChildren = new List<OctreeNode>();
-            node.octreeChildren.Clear();
-            
             node.centerOfMass = DVector3.zero;
             node.totalMass = 0;
             

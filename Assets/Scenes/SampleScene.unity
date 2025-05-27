@@ -182,7 +182,8 @@ MonoBehaviour:
     y: 0
     z: 0
   orbitTrails: 0
-  orbitTrailLength: 30
+  orbitTrailLength: 0
+  orbitTrailMaterial: {fileID: 2100000, guid: 074b49920ba97ee4696f6d1aa95c9870, type: 2}
 --- !u!23 &466824827
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -246,7 +247,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 10, y: 10, z: 10}
+  m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -336,6 +337,7 @@ MonoBehaviour:
   boundsPadding: 10
   simulationBounds: 1000
   orbitTrailMaterial: {fileID: 2100000, guid: 76834338c7b864c4f9070823a9dde2d7, type: 2}
+  orbitWidth: 0.2
   visualizationTimestep: 3
 --- !u!4 &1196126445
 Transform:
@@ -416,6 +418,7 @@ MonoBehaviour:
     z: 0
   orbitTrails: 1
   orbitTrailLength: 1000
+  orbitTrailMaterial: {fileID: 2100000, guid: 76834338c7b864c4f9070823a9dde2d7, type: 2}
 --- !u!23 &2127970474
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -479,7 +482,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 151}
-  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}

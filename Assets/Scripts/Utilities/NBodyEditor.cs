@@ -19,6 +19,7 @@ public class NBodyEditor : Editor
 
     private SerializedProperty orbitTrails;
     private SerializedProperty orbitTrailLength;
+    private SerializedProperty orbitTrailMaterial;
 
     private bool generalSettings;
     private bool initialVelocitySettings;
@@ -41,6 +42,7 @@ public class NBodyEditor : Editor
         
         orbitTrails = serializedObject.FindProperty("orbitTrails");
         orbitTrailLength = serializedObject.FindProperty("orbitTrailLength");
+        orbitTrailMaterial = serializedObject.FindProperty("orbitTrailMaterial");
     }
     
     public override void OnInspectorGUI()
@@ -90,6 +92,8 @@ public class NBodyEditor : Editor
             {
                 EditorGUILayout.PropertyField(orbitTrailLength);
             }
+            
+            EditorGUILayout.PropertyField(orbitTrailMaterial);
         }
         
         EditorGUILayout.EndFoldoutHeaderGroup();

@@ -15,6 +15,7 @@ public class OriginatorEditor : Editor
     private SerializedProperty simulationBounds;
 
     private SerializedProperty orbitTrailMaterial;
+    private SerializedProperty orbitWidth;
     private SerializedProperty visualizationTimestep;
 
     private bool generalSettings;
@@ -34,6 +35,7 @@ public class OriginatorEditor : Editor
         simulationBounds = serializedObject.FindProperty("simulationBounds");
         
         orbitTrailMaterial = serializedObject.FindProperty("orbitTrailMaterial");
+        orbitWidth = serializedObject.FindProperty("orbitWidth");
         visualizationTimestep = serializedObject.FindProperty("visualizationTimestep");
     }
     
@@ -72,6 +74,7 @@ public class OriginatorEditor : Editor
         if (visualizationSettings)
         {
             EditorGUILayout.PropertyField(orbitTrailMaterial);
+            EditorGUILayout.PropertyField(orbitWidth);
             EditorGUILayout.PropertyField(visualizationTimestep);
         }
 
