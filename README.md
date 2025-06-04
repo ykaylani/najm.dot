@@ -1,6 +1,6 @@
 # unity-n-body
 N-Body Simulation implemented in Unity currently in development.  
-It is an experimental project of mine that i expect to keep updating for about the next 2 years.
+
 ## Features
 - Gravitational N-Body Simulation  
 - Double Precision Mathematics  
