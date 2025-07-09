@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
 
-public struct OctreeNode
+public class OctreeNode
 {
     public DVector3 worldPosition;
     public double size;
@@ -40,19 +40,25 @@ public class NBodyOriginator : MonoBehaviour
     
     private const double gravitationalConstant = 6.67e-11;
     private List<NBody> bodies;
-    private OctreeNode octreeOriginator;
+    private OctreeNode octreeOriginator = new OctreeNode();
 
     void Start()
     {
         bodies = FindObjectsByType<NBody>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).ToList();
-        octreeOriginator.containedBodies = bodies;
-        
+        octreeOriginator.containedBodies = new List<NBody>(bodies);
+        octreeOriginator.octreeChildren = new List<OctreeNode>();
         octreeOriginator.worldPosition = DVector3.zero;
         octreeOriginator.size = simulationBounds + boundsPadding;
-        octreeOriginator.octreeChildren = new List<OctreeNode>();
 
         foreach (NBody body in bodies)
         {
+
+            if (body.calculateSemimajorAxis && body.centralBody != null)
+            {
+                DVector3 relativePosition = body.currentPosition - body.centralBody.currentPosition;
+                body.semimajorAxis = relativePosition.magnitude * distMultiplier;
+            }
+
             body.initialVelocity = CalculateInitialVelocity(body);
             body.currentVelocity = body.initialVelocity;
 
@@ -62,15 +68,11 @@ public class NBodyOriginator : MonoBehaviour
                 {
                     lRenderer = body.AddComponent<LineRenderer>();
                     body.lineRenderer = lRenderer;
-                    
+
                     lRenderer.useWorldSpace = true;
                     lRenderer.positionCount = 0;
                     lRenderer.startWidth = orbitWidth;
                     lRenderer.endWidth = orbitWidth;
-                }
-                else
-                {
-                    Debug.LogWarning($"{body} already has a LineRenderer! Please remove the LineRenderer component from the body.");
                 }
 
                 if (body.orbitTrailMaterial)
@@ -83,12 +85,9 @@ public class NBodyOriginator : MonoBehaviour
                     {
                         lRenderer.material = orbitTrailMaterial;
                     }
-                    else
-                    {
-                        Debug.LogWarning($"Orbit trail material is missing, and no material was assigned to {body}!");
-                    }
                 }
             }
+
         }
     }
 
@@ -115,7 +114,10 @@ public class NBodyOriginator : MonoBehaviour
         {
             foreach (NBody body in bodies)
             {
-                TrailVisualization(body);
+                if(body.orbitTrails)
+                {
+                    TrailVisualization(body);
+                }
             }
             accumulatedVisualizationTime = 0;
         }
@@ -198,7 +200,6 @@ public class NBodyOriginator : MonoBehaviour
 
     }
 
-    //creates octree for barnes-hut algorithm
     void BuildOctree(OctreeNode node, int recursionDepth)
     {
         if (node.containedBodies.Count > 2 && recursionDepth < 15)
@@ -417,9 +418,7 @@ public class NBodyOriginator : MonoBehaviour
             {
                 
                 double resultantMagnitude = gravitationalConstant * (startNode.totalMass * queryBody.mass / System.Math.Pow((startNode.centerOfMass - queryBody.predictedPosition).magnitude * distMultiplier, 2));
-                
                 DVector3 resultantDirection = (startNode.centerOfMass - queryBody.predictedPosition).normalized;
-                
                 resultant += resultantDirection * resultantMagnitude;
             }
             else
@@ -437,9 +436,7 @@ public class NBodyOriginator : MonoBehaviour
                 if (otherBody == queryBody) continue;
                 
                 double resultantMagnitude = gravitationalConstant * (otherBody.mass * queryBody.mass / System.Math.Pow((otherBody.predictedPosition - queryBody.predictedPosition).magnitude * distMultiplier, 2));
-                
                 DVector3 resultantDirection = (otherBody.predictedPosition - queryBody.predictedPosition).normalized;
-                
                 resultant += resultantDirection * resultantMagnitude;
             }
         }

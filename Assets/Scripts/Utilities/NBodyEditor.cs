@@ -12,6 +12,7 @@ public class NBodyEditor : Editor
     private SerializedProperty centralBody;
     private SerializedProperty eccentricity;
     private SerializedProperty semimajorAxis;
+    private SerializedProperty calculateSemimajorAxis;
     private SerializedProperty trueAnomaly;
     private SerializedProperty argumentOfPeriapsis;
     private SerializedProperty ascendingNodeLongitude;
@@ -35,6 +36,7 @@ public class NBodyEditor : Editor
         centralBody = serializedObject.FindProperty("centralBody");
         eccentricity = serializedObject.FindProperty("eccentricity");
         semimajorAxis = serializedObject.FindProperty("semimajorAxis");
+        calculateSemimajorAxis = serializedObject.FindProperty("calculateSemimajorAxis");
         trueAnomaly = serializedObject.FindProperty("trueAnomaly");
         argumentOfPeriapsis = serializedObject.FindProperty("argumentOfPeriapsis");
         ascendingNodeLongitude = serializedObject.FindProperty("ascendingNodeLongitude");
@@ -72,7 +74,13 @@ public class NBodyEditor : Editor
                 EditorGUILayout.PropertyField(toggleKeplerianOrbits);
                 EditorGUILayout.PropertyField(centralBody);
                 EditorGUILayout.PropertyField(eccentricity);
-                EditorGUILayout.PropertyField(semimajorAxis);
+                EditorGUILayout.PropertyField(calculateSemimajorAxis);
+
+                if (!calculateSemimajorAxis.boolValue)
+                {
+                    EditorGUILayout.PropertyField(semimajorAxis);
+                }
+                
                 EditorGUILayout.PropertyField(trueAnomaly);
                 EditorGUILayout.PropertyField(argumentOfPeriapsis);
                 EditorGUILayout.PropertyField(ascendingNodeLongitude);

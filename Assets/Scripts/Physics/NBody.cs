@@ -18,6 +18,7 @@ public class NBody : MonoBehaviour
     [Tooltip("The body that this body will orbit around")][HideInInspector]public NBody centralBody;
     [Tooltip("Determines how elliptical the orbit is (0 is circular, 1 is very elongated)")][HideInInspector]public double eccentricity = 0.1;
     [Tooltip("The orbit's longest radius in real-world units (simulation units * distMultiplier)")][HideInInspector]public double semimajorAxis = 1.5e11;
+    public bool calculateSemimajorAxis = true;
     [Tooltip("The angle (in radians) between the periapsis and the current body position")][HideInInspector]public double trueAnomaly = 0;
     [Tooltip("Rotation of the orbit relative to it's plane")][HideInInspector]public double argumentOfPeriapsis = 0;
     [HideInInspector]public double ascendingNodeLongitude = 0;
