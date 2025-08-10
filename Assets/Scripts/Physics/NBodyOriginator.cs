@@ -100,7 +100,7 @@ public class NBodyOriginator : MonoBehaviour
         octreeOriginator.worldPosition = DVector3.zero;
         octreeOriginator.size = simulationBounds + boundsPadding;
         octreeOriginator.octreeChildren = new List<OctreeNode>();
-        octreeOriginator.containedBodies = bodies;
+        octreeOriginator.containedBodies = new List<NBody>(bodies);
         
         BuildOctree(octreeOriginator, 0);
         ExecuteForceCalculations(bodies);
