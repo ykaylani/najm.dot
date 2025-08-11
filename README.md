@@ -47,7 +47,7 @@ General
 - Simulation Settings is 4 values: the first one (x) being the Distance Multiplier to convert from unity meters to simulation meters. The default is 1e9 or 1 billion, so 40 unity meters would be 40 billion simulation meters.  
 - The second value (y) is the simulation timestep, which is how long it takes for the simulation to execute one timestep. The default is 0.02, so the simulation will run once every 0.02 seconds.  
 - The third value (z) is the simulation bounds for Barnes-Hut.  
-- the fourth value (w) is the padding for the bounds.  z
+- the fourth value (w) is the padding for the bounds.  
 
 Barnes-Hut
 - the Opening Angle Criterion is the threshold that the Barnes-Hut algorithm will use to determine if it should use an approximation of mass or take the exact masses. values near 0 cause more accuracy but less prformance, and the opposite is true for values near 1. <br>
@@ -77,15 +77,29 @@ Initial Velocity Settings
 
 ## Roadmap
 
-The roadmap for this project in chronological order.
-- Introducting Higher-Order Integrations like Fourth Order Runge-Kutta.
-- Object Pooling for the Barnes-Hut algorithm's octants to decrease GC pressure.
-- Make the simulation **NOT** tied to the origin of the world to help with integration into games (if that were to happen) and help with adaptive simulation bounds' effectiveness.
-- Custom Mesh Generation for visualization replacing LineRenderer as LineRenderer creates CPU overhead at scale.
-- Adjustable Simulation Speed separate from Unity's TimeScale.
-- Body Collisions for more stability.
-- Data Recording for export.
-- Integration into Unity DOTS for performance.
+### Major:  
+
+ - Burst Compilation  
+ - C# Job Integration for Multithreading  
+ - Delinking Body from MonoBehaviour  
+ - Delinking Simulation from Time.TimeScale  
+ - Custom Mesh Generation for Orbit Trails
+ - Reliable Close Encounter Handling (Smoothing, Collisions)
+
+#### Low-Priority Major:
+
+ - Fragmentation Physics  
+ - Planetesimal-Based Force Calculations  
+
+### Minor:
+
+- Floating Origin for Flexibility
+- Non-Singleton Propagator for Multiple Simulations / Scene
+- Major Event Triggers (Body Collisions, Orbit Escape, etc.)
+- Improved Editor
+- Rigidbody and Custom Integrator User Choice
+- Multiple Integrators (Velocity Verlet, 4th Order Runge-Kutta, Symplectic Euler, Leapfrog)
+- Unity.Mathematics replacing DVector3
 
 ## Credits
 
