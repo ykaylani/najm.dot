@@ -10,9 +10,6 @@ public class Body : MonoBehaviour
     
     [HideInInspector]public DVector3 predictedPosition;
     
-    [HideInInspector]public LineRenderer lineRenderer;
-    [HideInInspector]public List<Vector3> orbitPoints;
-    
     [Tooltip("Body's Mass in kilograms.")] public double mass = 5.972e24; // Earth mass default
     
     [Tooltip("Whether or not the initial velocity of the object will be calculated using the keplerian properties")]public bool keplerianOrbits = true;
@@ -26,10 +23,6 @@ public class Body : MonoBehaviour
     [Tooltip("Difference between the world plane and the orbital plane")][HideInInspector]public double inclination = 0;
     
     [Tooltip("Initial Velocity of the body")][HideInInspector]public DVector3 initialVelocity;
-    
-    [Tooltip("Whether or not orbit trails will be shown. These are currently not recommended for purely performance-based applications as they use Unity's built-in LineRenderer that can cause CPU overhead issues when scaled.")] public bool orbitTrails = true;
-    [Tooltip("The length (in timesteps) of the orbit trail.")] public int orbitTrailLength = 30;
-    [Tooltip("The material of this body's orbit. If not set, it will be overriden by the originator's orbit trail material.")]public Material orbitTrailMaterial;
     
     private void Awake()
     {

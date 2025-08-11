@@ -18,13 +18,8 @@ public class NBodyEditor : Editor
     private SerializedProperty ascendingNodeLongitude;
     private SerializedProperty inclination;
 
-    private SerializedProperty orbitTrails;
-    private SerializedProperty orbitTrailLength;
-    private SerializedProperty orbitTrailMaterial;
-
     private bool generalSettings;
     private bool initialVelocitySettings;
-    private bool visualizationSettings;
     
     private void OnEnable()
     {
@@ -41,10 +36,6 @@ public class NBodyEditor : Editor
         argumentOfPeriapsis = serializedObject.FindProperty("argumentOfPeriapsis");
         ascendingNodeLongitude = serializedObject.FindProperty("ascendingNodeLongitude");
         inclination = serializedObject.FindProperty("inclination");
-        
-        orbitTrails = serializedObject.FindProperty("orbitTrails");
-        orbitTrailLength = serializedObject.FindProperty("orbitTrailLength");
-        orbitTrailMaterial = serializedObject.FindProperty("orbitTrailMaterial");
     }
     
     public override void OnInspectorGUI()
@@ -89,23 +80,6 @@ public class NBodyEditor : Editor
         }
         
         EditorGUILayout.EndFoldoutHeaderGroup();
-        
-        visualizationSettings = EditorGUILayout.BeginFoldoutHeaderGroup(visualizationSettings, "Visualization");
-
-        if (visualizationSettings)
-        {
-            EditorGUILayout.PropertyField(orbitTrails);
-
-            if (orbitTrails.boolValue)
-            {
-                EditorGUILayout.PropertyField(orbitTrailLength);
-            }
-            
-            EditorGUILayout.PropertyField(orbitTrailMaterial);
-        }
-        
-        EditorGUILayout.EndFoldoutHeaderGroup();
-        
         serializedObject.ApplyModifiedProperties();
     }
 }

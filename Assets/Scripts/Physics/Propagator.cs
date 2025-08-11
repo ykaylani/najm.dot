@@ -45,7 +45,8 @@ public class Propagator : MonoBehaviour
                 body.semimajorAxis = relativePosition.magnitude * simulationSettings.x;
             }
 
-            body.initialVelocity = CalculateInitialVelocity(body);
+            double4 x = CalculateInitialVelocity(body);
+            body.initialVelocity = new DVector3(x.x, x.y, x.z);
             body.currentVelocity = body.initialVelocity;
 
         }
@@ -66,47 +67,57 @@ public class Propagator : MonoBehaviour
         ExecuteForceCalculations(bodies);
     }
 
-    DVector3 CalculateInitialVelocity(Body body)
+    double4 CalculateInitialVelocity(Body body)
     {
         if (body.keplerianOrbits)
         {
             if (!body.centralBody)
             {
                 Debug.LogWarning($"{body} has No Central Body Assigned to Orbit around! If it is the central body, please turn off 'Keplerian Orbits'.");
-                return body.initialVelocity;
+                double4 ivr = double4.zero;
+                ivr.x = body.initialVelocity.x;
+                ivr.y = body.initialVelocity.y;
+                ivr.z = body.initialVelocity.z;
+                return ivr;
             }
+
+            double4 transformation = new double4(0, 0, 0, (gravitationalConstant * body.centralBody.mass) / simulationSettings.x); 
             
-            double standardGravitationalParameter = (gravitationalConstant * body.centralBody.mass) / simulationSettings.x;
-            double angularMomentumMagnitude = System.Math.Sqrt(standardGravitationalParameter * body.semimajorAxis * (1 - System.Math.Pow(body.eccentricity, 2)));
-
-            DVector3 perifocalVelocity = new DVector3(
-                -(standardGravitationalParameter / angularMomentumMagnitude) * System.Math.Sin(body.trueAnomaly),
-                standardGravitationalParameter / angularMomentumMagnitude * (body.eccentricity + System.Math.Cos(body.trueAnomaly)),
-                0
-            );
-
-            DVector3 periapsisRotation = new DVector3(
-                perifocalVelocity.x * System.Math.Cos(body.argumentOfPeriapsis) - perifocalVelocity.y * System.Math.Sin(body.argumentOfPeriapsis),
-                perifocalVelocity.x * System.Math.Sin(body.argumentOfPeriapsis) + perifocalVelocity.y * System.Math.Cos(body.argumentOfPeriapsis),
-                perifocalVelocity.z
-            );
-
-            DVector3 inclinationRotation = new DVector3(
-                periapsisRotation.x,
-                periapsisRotation.y * System.Math.Cos(body.inclination) - periapsisRotation.z * System.Math.Sin(body.inclination), 
-                periapsisRotation.y * System.Math.Sin(body.inclination) + periapsisRotation.z * System.Math.Cos(body.inclination)
-            );
-
-            DVector3 ascendingNodeRotation = new DVector3(
-                inclinationRotation.x * System.Math.Cos(body.ascendingNodeLongitude) - inclinationRotation.y * System.Math.Sin(body.ascendingNodeLongitude),
-                inclinationRotation.x * System.Math.Sin(body.ascendingNodeLongitude) + inclinationRotation.y * System.Math.Cos(body.ascendingNodeLongitude),
-                inclinationRotation.z
-            );
+            double factor = transformation.w / System.Math.Sqrt(transformation.w * body.semimajorAxis * (1 - System.Math.Pow(body.eccentricity, 2)));
+            double taSin = System.Math.Sin(body.trueAnomaly);
+            double taCos = System.Math.Cos(body.trueAnomaly);
+            double periapsisSin = System.Math.Sin(body.argumentOfPeriapsis);
+            double periapsisCos = System.Math.Cos(body.argumentOfPeriapsis);
+            double inclinationSin = System.Math.Sin(body.inclination);
+            double inclinationCos = System.Math.Cos(body.inclination);
+            double ascendingNodeSin = System.Math.Sin(body.ascendingNodeLongitude);
+            double ascendingNodeCos = System.Math.Cos(body.ascendingNodeLongitude);
             
-            return ascendingNodeRotation;
+            //perifocal and periapsis rotations
+            transformation.x = -factor * taSin * periapsisCos - factor * (body.eccentricity + taCos) * periapsisSin;
+            transformation.y = -factor * taSin * periapsisSin + factor * (body.eccentricity + taCos) * periapsisCos;
+            transformation.z = 0;
+            
+            //transformation.x carries over to ascending node rotation (this is inclination)
+            double tempy = transformation.y;
+            double tempz = transformation.z;
+            transformation.y = tempy * inclinationCos - tempz * inclinationSin;
+            transformation.z = tempy * inclinationSin + tempz * inclinationCos;
+            
+            //ascending node rotation (z is not modified)
+            double tempx = transformation.x;
+            double tempy2 = transformation.y;
+            transformation.x = tempx * ascendingNodeCos - tempy2 * ascendingNodeSin;
+            transformation.y = tempx * ascendingNodeSin + tempy2 * ascendingNodeCos;
+            
+            return transformation;
         }
-        
-        return body.initialVelocity;
+
+        double4 iv = double4.zero;
+        iv.x = body.initialVelocity.x;
+        iv.y = body.initialVelocity.y;
+        iv.z = body.initialVelocity.z;
+        return iv;
     }
 
     DVector3 PredictPositions(List<Body> lBodies)
