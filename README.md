@@ -36,29 +36,24 @@ git clone https://github.com/sandalconsumer/unity-n-body.git
 
 There are two Parts to this N-Body Simulation:
 
-1. N Body Originator
-2. N Body <br>
+1. Propagator  
+2. Body  
 
-- The **Originator** controls all the N-Bodies' movement and physics, and the **N-Bodies** are for storing the individual data of each body.
+- The **Propagator** controls all the N-Bodies' movement and physics, and the **Bodies** are for storing the individual data of each body.
 
-**Originator Properties**
+**Propagator Properties**
 
 General
-- Dist Multiplier controls the **Scale** of the simulation. The default value is 1 billion, meaning that every 1 unity meter is 1 billion simulation meters.
-- Simulation Timestep controls the amount of time the objects will move then they are updated. If the value is "0.05", the bodies will move by a time of 0.05 in-world seconds every time unity's FixedUpdate is called (every 0.02 seconds by default) <br>
+- Simulation Settings is 4 values: the first one (x) being the Distance Multiplier to convert from unity meters to simulation meters. The default is 1e9 or 1 billion, so 40 unity meters would be 40 billion simulation meters.  
+- The second value (y) is the simulation timestep, which is how long it takes for the simulation to execute one timestep. The default is 0.02, so the simulation will run once every 0.02 seconds.  
+- The third value (z) is the simulation bounds for Barnes-Hut.  
+- the fourth value (w) is the padding for the bounds.  z
 
 Barnes-Hut
 - the Opening Angle Criterion is the threshold that the Barnes-Hut algorithm will use to determine if it should use an approximation of mass or take the exact masses. values near 0 cause more accuracy but less prformance, and the opposite is true for values near 1. <br>
 
 Bounds
-- Adaptive Simulation bounds determines if the Simulation bounds will move to accomodate the bodies for accurate calculations with barnes-hut. As of Version 0.3.1, it is better to disable IF you are using basic initial velocities as they have to chance to fling bodies thousands of meters away, and that causes the bounds to try and follow them.
-- Bounds Padding is a extra distance added to the simulation bounds for extra stability with Adaptive Simulation Bounds. Generally not needed when using static simuation bounds.
-- Simulation Bounds only appears when Adaptive Simulation Bounds is toggled off, and it lets you define a specific domain for your simulation. If bodies go outside this range, physics calculations may not be accurate.
-
-Visualization  
-- Orbit Trail Material is the material the orbit visualization will use. This will be used as the default for all trails, but individual materials can be set from the N-Bodies.
-- Orbit Width controls the width of the line that represents the orbit trail.
-- Vizualization Timestep is how much time it will take to update the visualization.
+- Adaptive Simulation bounds determines if the Simulation bounds will move to accomodate the bodies for accurate calculations with barnes-hut. As of Versions 0.4.x-alpha.1, it is better to disable IF you are using basic initial velocities as they have to chance to fling bodies thousands of meters away, and that causes the bounds to try and follow them.
 
 **N-Body Properties**
 
@@ -73,11 +68,6 @@ Initial Velocity Settings
 - True Anomaly is the current position of the body along it's path from the periapsis.  
 - the Ascending Node Longitude is the angle (in radians) from where the body will cross from going south to going north.  
 - the Inclination is the tilt of the orbit.  
-
-Visualization
-- Orbit Trails toggles the visibility of orbit trails. This is currently not recommended for purely performance-based applications as it uses Unity's built-in LineRenderer, which can produce a ton of CPU overhead with many objects.  
-- Orbit Trail Material will be used to render the path. If the N-Body has this as empty, the simulation will fallback to the Originator's Orbit Trail Material.  
-- Orbit trail length defines the maximum number of previous visualization timesteps that can be displayed.  
 
 ## Technical Details
 
