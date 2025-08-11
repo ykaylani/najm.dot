@@ -1,6 +1,6 @@
 using UnityEditor;
 
-[CustomEditor(typeof(NBody))]
+[CustomEditor(typeof(Body))]
 [CanEditMultipleObjects]
 public class NBodyEditor : Editor
 {

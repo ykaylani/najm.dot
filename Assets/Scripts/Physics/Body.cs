@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class NBody : MonoBehaviour
+public class Body : MonoBehaviour
 {
     [HideInInspector]public DVector3 currentAcceleration;
     [HideInInspector]public DVector3 currentVelocity;
@@ -15,7 +15,7 @@ public class NBody : MonoBehaviour
     [Tooltip("Body's Mass in kilograms.")] public double mass = 5.972e24; // Earth mass default
     
     [Tooltip("Whether or not the initial velocity of the object will be calculated using the keplerian properties")]public bool keplerianOrbits = true;
-    [Tooltip("The body that this body will orbit around")][HideInInspector]public NBody centralBody;
+    [Tooltip("The body that this body will orbit around")][HideInInspector]public Body centralBody;
     [Tooltip("Determines how elliptical the orbit is (0 is circular, 1 is very elongated)")][HideInInspector]public double eccentricity = 0.1;
     [Tooltip("The orbit's longest radius in real-world units (simulation units * distMultiplier)")][HideInInspector]public double semimajorAxis = 1.5e11;
     public bool calculateSemimajorAxis = true;

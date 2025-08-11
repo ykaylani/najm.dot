@@ -1,8 +1,8 @@
 using UnityEditor;
 
-[CustomEditor(typeof(NBodyOriginator))]
+[CustomEditor(typeof(Propagator))]
 [CanEditMultipleObjects]
-public class OriginatorEditor : Editor
+public class PropagatorEditor : Editor
 {
 
     private SerializedProperty distMultiplier;
