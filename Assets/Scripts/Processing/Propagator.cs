@@ -1,11 +1,10 @@
-using System;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 using Unity.Burst;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
-using Unity.Mathematics;
-using UnityEngine.Jobs;
+
 public class OctantStore
 {
     public NativeArray<double3> positions;
@@ -41,7 +40,7 @@ public class Propagator : MonoBehaviour
 {
     [Tooltip("x is simulation scale, y is simulation timestep, z is bounds, w is padding")]
     public double4 simulationSettings = new double4(1e9, 0.02, 200, 10);
-    public double simulationTimestep = 1;
+    public double simulationTimestepMultiplier = 1;
     
     [Tooltip("The s/d criterion for barnes-hut to determine if it should use the approximation of an octant or compute each body. Lower Values make it more accurate and higher values make it more performant.")]
     [Range(0, 1)]public float openingAngleCriterion = 0.5f;
@@ -61,7 +60,7 @@ public class Propagator : MonoBehaviour
 
     private NativeArray<int> globalHistogram;
     private NativeArray<int> histograms;
-    public NativeArray<int> prefixSums;
+    private NativeArray<int> prefixSums;
 
     private CalculateVelocities velocityJob;
     private ResetOctantsJob resetOctants;
@@ -76,14 +75,13 @@ public class Propagator : MonoBehaviour
     private comJob comsJob;
     private ForceJob forceJob;
     
-    
     private JobHandle initialVelocityJobHandle;
     private JobHandle dependency;
     
     void Start()
     {
         gravitationalConstant /= simulationSettings.x * simulationSettings.x * simulationSettings.x;
-        gravitationalConstant *= simulationTimestep * simulationTimestep;
+        gravitationalConstant *= simulationTimestepMultiplier * simulationTimestepMultiplier;
         
         octants.positions = new NativeArray<double3>(maxOctants, Allocator.Persistent);
         octants.coms = new NativeArray<double3>(maxOctants, Allocator.Persistent);
@@ -313,6 +311,11 @@ public class Propagator : MonoBehaviour
         tempBodyPositions.Dispose();
         tempBodyVelocities.Dispose();
         tempBodyMasses.Dispose();
+        
+        if (bodies.positions.IsCreated) bodies.positions.Dispose();
+        if (bodies.velocities.IsCreated) bodies.velocities.Dispose();
+        if (bodies.masses.IsCreated) bodies.masses.Dispose();
+        if (bodies.encodings.IsCreated) bodies.encodings.Dispose();
 
         bodyForces.Dispose();
     }
@@ -374,7 +377,7 @@ public struct CalculateVelocities : IJobParallelFor
 
     public void Execute(int body)
     {
-        if (!(keplerianParams[body][1][2] >= 0)) return;
+        if (!(keplerianParams[body][1][2] >= 0)) {bodyVelocities[body] = double3.zero; return;}
         double4x2 bodyKeplerianParams = keplerianParams[body];
         
         if (bodyKeplerianParams[1][3] > 0 && !(bodyKeplerianParams[1][2] < 0))

@@ -31,12 +31,7 @@ public class Visualizer : MonoBehaviour
                 bodies[i].transform.localScale = Vector3.one * 3;
                 bodies[i].SetActive(true);
                 
-                // Set initial position
-                Vector3 position = new Vector3(
-                    (float)propagator.bodies.positions[i].x,
-                    (float)propagator.bodies.positions[i].y,
-                    (float)propagator.bodies.positions[i].z
-                );
+                Vector3 position = new Vector3((float)propagator.bodies.positions[i].x, (float)propagator.bodies.positions[i].y, (float)propagator.bodies.positions[i].z);
                 bodies[i].transform.localPosition = position;
             }
         }

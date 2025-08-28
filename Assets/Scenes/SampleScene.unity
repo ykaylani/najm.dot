@@ -204,7 +204,7 @@ MonoBehaviour:
     y: 0.02
     z: 500
     w: 10
-  simulationTimestep: 500000
+  simulationTimestepMultiplier: 500000
   openingAngleCriterion: 0
 --- !u!4 &1196126445
 Transform:
@@ -233,45 +233,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a73af978e273f784a95c497d707c1ab2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  masses:
-  - 1.989e+30
-  - 5.9722e+24
-  positions:
-  - x: 0
-    y: 0
-    z: 0
-  - x: 0
-    y: 0
-    z: 149.8
-  velocities:
-  - x: 0
-    y: 0
-    z: 0
-  - x: 0
-    y: 0
-    z: 0
-  keplerianParams:
-  - c0:
-      x: 0
-      y: 0
-      z: 0
-      w: 0
-    c1:
-      x: 0
-      y: 0
-      z: -1
-      w: 0
-  - c0:
-      x: 0
-      y: 0.01671022
-      z: 6.086650063297812
-      w: 0.0000008726646259971647
-    c1:
-      x: 1.9933026650579555
-      y: 0
-      z: 0
-      w: 1
   propagator: {fileID: 1196126444}
+  bodies:
+  - position:
+      x: 0
+      y: 0
+      z: 0
+    mass: 1.9e+30
+    keplerianOrbit: 1
+    primaryBody: -1
+    eccentricity: 0
+    inclination: 0
+    argumentOfPeriapsis: 0
+    longitudeOfTheAscendingNode: 0
+  - position:
+      x: 0
+      y: 0
+      z: 30
+    mass: 5.9722e+24
+    keplerianOrbit: 1
+    primaryBody: 0
+    eccentricity: 0.0167086
+    inclination: 0.00000087266463
+    argumentOfPeriapsis: 5.028293574995664
+    longitudeOfTheAscendingNode: 3.052580861738082
 --- !u!114 &1196126447
 MonoBehaviour:
   m_ObjectHideFlags: 0
