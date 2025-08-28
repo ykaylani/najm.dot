@@ -13,7 +13,7 @@ public class Visualizer : MonoBehaviour
         InitializeBodies();
     }
 
-    void Update()
+    void FixedUpdate()
     {
         UpdateBodyPositions();
     }
@@ -24,7 +24,7 @@ public class Visualizer : MonoBehaviour
         {
             int numBodies = propagator.bodies.positions.Length;
             bodies = new GameObject[numBodies];
-
+            
             for (int i = 0; i < numBodies; i++)
             {
                 bodies[i] = Instantiate(bodyPrefab, transform);

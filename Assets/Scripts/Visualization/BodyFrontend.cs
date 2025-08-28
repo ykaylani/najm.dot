@@ -3,6 +3,8 @@ using UnityEngine;
 using Unity.Collections;
 using Unity.Mathematics;
 
+[DefaultExecutionOrder(0)
+]
 [RequireComponent(typeof(Propagator))]
 public class BodyFrontend : MonoBehaviour
 {
