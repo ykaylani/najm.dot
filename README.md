@@ -1,4 +1,4 @@
-# unity-n-body
+# astra.dot
 N-Body Simulation implemented in Unity currently in development.  
 
 ## Features
