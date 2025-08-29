@@ -1,5 +1,5 @@
 # astra.dot
-N-Body Simulation implemented in Unity currently in development.  
+N-Body Simulation Implemented in Unity DOTS
 
 ## Features
 - Gravitational N-Body Simulation  
