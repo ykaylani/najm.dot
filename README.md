@@ -1,4 +1,4 @@
-# astra.dot
+# najm.dot
 
 A high-performance, real-time N-Body gravity simulation implemented in Unity's Data-Oriented Tech Stack (DOTS). It leverages the Barnes-Hut algorithm and Morton encoding to efficiently simulate thousands of gravitationally interacting bodies with physically accurate initial conditions.
 
