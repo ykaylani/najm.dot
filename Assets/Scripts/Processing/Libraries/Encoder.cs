@@ -41,18 +41,17 @@ public static class Encoder
         return (int)((encoded >> shift) & 0x7ul);
     }
     
-}
-
-[BurstCompile]
-public struct BodyEncoding : IJobParallelFor
-{
-    public double3 maxBounds;
-    
-    [ReadOnly] public NativeArray<double3> positions;
-    [WriteOnly] public NativeArray<ulong> encodings;
-    
-    public void Execute(int body)
+    [BurstCompile]
+    public struct BodyEncoding : IJobParallelFor
     {
-        encodings[body] = Encoder.Morton(positions[body], -maxBounds, maxBounds);
+        public double3 maxBounds;
+    
+        [ReadOnly] public NativeArray<double3> positions;
+        [WriteOnly] public NativeArray<ulong> encodings;
+    
+        public void Execute(int body)
+        {
+            encodings[body] = Encoder.Morton(positions[body], -maxBounds, maxBounds);
+        }
     }
 }

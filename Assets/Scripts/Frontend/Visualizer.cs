@@ -1,51 +1,59 @@
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 
 [RequireComponent(typeof(Propagator))]
 public class Visualizer : MonoBehaviour
 {
-    public GameObject bodyPrefab;
-    private Propagator propagator;
-    private GameObject[] bodies;
+    public Propagator propagator;
+    public Mesh pointMesh;
+    public Material material;
+    public float pointScale = 5f;
+
+    private NativeArray<Vector3> renderPositions;
+    private Matrix4x4[] matrices;
+    private bool needsUpdate;
 
     void Start()
     {
-        propagator = GetComponent<Propagator>();
-        InitializeBodies();
+        renderPositions = new NativeArray<Vector3>(propagator.bodies.positions.Length, Allocator.Persistent);
+        matrices = new Matrix4x4[propagator.bodies.positions.Length];
+
+        for (int i = 0; i < propagator.bodies.positions.Length; i++) {renderPositions[i] = (float3)propagator.bodies.positions[i];}
     }
 
     void FixedUpdate()
     {
-        UpdateBodyPositions();
+        CopyPositionsJob job = new CopyPositionsJob { source = propagator.bodies.positions, destination = renderPositions };
+        job.Schedule(propagator.bodies.positions.Length, 64).Complete();
     }
 
-    void InitializeBodies()
+    void LateUpdate()
     {
-        if (propagator.bodies.positions.IsCreated)
+        
+        for (int i = 0; i < propagator.bodies.positions.Length; i++)
         {
-            int numBodies = propagator.bodies.positions.Length;
-            bodies = new GameObject[numBodies];
-            
-            for (int i = 0; i < numBodies; i++)
-            {
-                bodies[i] = Instantiate(bodyPrefab, transform);
-                bodies[i].transform.localScale = Vector3.one * 3;
-                bodies[i].SetActive(true);
-                
-                Vector3 position = new Vector3((float)propagator.bodies.positions[i].x, (float)propagator.bodies.positions[i].y, (float)propagator.bodies.positions[i].z);
-                bodies[i].transform.localPosition = position;
-            }
+            matrices[i] = Matrix4x4.TRS(renderPositions[i], Quaternion.identity, Vector3.one * pointScale);
         }
+        
+        Graphics.DrawMeshInstanced(pointMesh, 0, material, matrices, propagator.bodies.positions.Length, null, UnityEngine.Rendering.ShadowCastingMode.Off, false);
     }
 
-    void UpdateBodyPositions()
+    void OnDestroy()
     {
-        if (bodies == null || !propagator.bodies.positions.IsCreated) return;
+        renderPositions.Dispose();
+    }
+    
+}
 
-        for (int i = 0; i < bodies.Length; i++)
-        {
-            Vector3 position = new Vector3((float)propagator.bodies.positions[i].x, (float)propagator.bodies.positions[i].y, (float)propagator.bodies.positions[i].z);
-            bodies[i].transform.localPosition = position;
-            
-        }
+struct CopyPositionsJob : IJobParallelFor
+{
+    [ReadOnly] public NativeArray<double3> source;
+    [WriteOnly] public NativeArray<Vector3> destination;
+
+    public void Execute(int index)
+    {
+        destination[index] = (float3)source[index];
     }
 }

@@ -1,7 +1,6 @@
 using UnityEditor;
 using UnityEngine;
 
-
 [DefaultExecutionOrder(0)]
 [RequireComponent(typeof(Propagator))]
 public class BodyFrontend : MonoBehaviour

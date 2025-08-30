@@ -45,8 +45,10 @@ public class Propagator : MonoBehaviour
     [Tooltip("The s/d criterion for barnes-hut to determine if it should use the approximation of an octant or compute each body. Lower Values make it more accurate and higher values make it more performant.")]
     [Range(0, 1)]public float openingAngleCriterion = 0.5f;
     
-    private  double gravitationalConstant = 6.67e-11;
-    private const short maxOctants = 4096;
+    private double gravitationalConstant = 6.67e-11;
+    public int maxOctants = 16384;
+    public int splittingThreshold = 16;
+    public int softeningLengthSquared = 5000;
     
     public BodyStore bodies = new BodyStore();
     private OctantStore octants = new OctantStore();
@@ -64,12 +66,12 @@ public class Propagator : MonoBehaviour
 
     private CalculateVelocities velocityJob;
     private ResetOctantsJob resetOctants;
-    private BodyEncoding encoderJob;
-    private RadixClearHistograms radixClearHistogramsJob;
-    private RadixLocalHistograms radixLocalHistogramsJob;
-    private RadixGlobalHistogram radixGlobalHistogramJob;
-    private RadixScatter radixScatterJob;
-    private RadixReassign radixReassignJob;
+    private Encoder.BodyEncoding encoderJob;
+    private Sorter.RadixClearHistograms radixClearHistogramsJob;
+    private Sorter.RadixLocalHistograms radixLocalHistogramsJob;
+    private Sorter.RadixGlobalHistogram radixGlobalHistogramJob;
+    private Sorter.RadixScatter radixScatterJob;
+    private Sorter.RadixReassign radixReassignJob;
     private OctreeBuildRoot octreeBuildRootJob;
     private OctreeBuildSubtrees octreeBuildSubtreesJob;
     private comJob comsJob;
@@ -138,20 +140,20 @@ public class Propagator : MonoBehaviour
             bodyCount = bodies.positions.Length,
         };
 
-        encoderJob = new BodyEncoding
+        encoderJob = new Encoder.BodyEncoding
         {
             maxBounds = new double3(simulationSettings.z + simulationSettings.w),
             encodings = bodies.encodings,
             positions = bodies.positions,
         };
 
-        radixClearHistogramsJob = new RadixClearHistograms
+        radixClearHistogramsJob = new Sorter.RadixClearHistograms
         {
             globalHistogram = globalHistogram,
             histograms = histograms,
         };
         
-        radixGlobalHistogramJob = new RadixGlobalHistogram
+        radixGlobalHistogramJob = new Sorter.RadixGlobalHistogram
         {
             localHistograms = histograms,
             prefixSums = prefixSums,
@@ -159,7 +161,7 @@ public class Propagator : MonoBehaviour
             segments = 16
         };
 
-        radixReassignJob = new RadixReassign
+        radixReassignJob = new Sorter.RadixReassign
         {
             encodings = bodies.encodings,
             positions = bodies.positions,
@@ -182,6 +184,7 @@ public class Propagator : MonoBehaviour
             octantPoolStartMarker = octants.poolStartMarker,
             octantPositions = octants.positions,
             octantSizes = octants.sizes,
+            splittingThreshold = splittingThreshold
         };
 
         octreeBuildSubtreesJob = new OctreeBuildSubtrees
@@ -195,6 +198,7 @@ public class Propagator : MonoBehaviour
             octantPoolStartMarker = octants.poolStartMarker,
             octantPositions = octants.positions,
             octantSizes = octants.sizes,
+            splittingThreshold = splittingThreshold,
         };
 
         comsJob = new comJob
@@ -208,6 +212,7 @@ public class Propagator : MonoBehaviour
             octantBodyCounts = octants.bodyCounts,
             octantTreeChildren = octants.treeChildren,
             octantTreeChildCount = octants.treeChildCount,
+            octantLimit = maxOctants
         };
 
         forceJob = new ForceJob
@@ -224,11 +229,13 @@ public class Propagator : MonoBehaviour
             bodyPositions = bodies.positions,
             gravitationalConstant = gravitationalConstant,
             openingAngle = openingAngleCriterion,
+            softening = softeningLengthSquared
             
         };
 
         initialVelocityJobHandle = new JobHandle();
         initialVelocityJobHandle = velocityJob.Schedule(bodies.keplerianParams.Length, 16, initialVelocityJobHandle);
+        initialVelocityJobHandle.Complete();
     }
 
     void FixedUpdate()
@@ -244,8 +251,7 @@ public class Propagator : MonoBehaviour
         }
         
         octants.poolMarker[0] = 1;
-
-
+        
         dependency = resetOctants.Schedule(octants.positions.Length, 32, dependency);
         dependency = encoderJob.Schedule(bodies.encodings.Length, 32, dependency);
 
@@ -253,7 +259,7 @@ public class Propagator : MonoBehaviour
         {
             dependency = radixClearHistogramsJob.Schedule(dependency);
             
-            radixLocalHistogramsJob = new RadixLocalHistograms
+            radixLocalHistogramsJob = new Sorter.RadixLocalHistograms
             {
                 encodings = bodies.encodings,
                 localHistograms = histograms,
@@ -263,7 +269,7 @@ public class Propagator : MonoBehaviour
             dependency = radixLocalHistogramsJob.Schedule(16, 1, dependency);
             dependency = radixGlobalHistogramJob.Schedule(dependency);
 
-            radixScatterJob = new RadixScatter
+            radixScatterJob = new Sorter.RadixScatter
             {
                 encodings = bodies.encodings,
                 tempEncodings = tempBodyEncodings,
@@ -377,7 +383,7 @@ public struct CalculateVelocities : IJobParallelFor
 
     public void Execute(int body)
     {
-        if (!(keplerianParams[body][1][2] >= 0)) {bodyVelocities[body] = double3.zero; return;}
+        if (!(keplerianParams[body][1][2] >= 0)) {return;}
         double4x2 bodyKeplerianParams = keplerianParams[body];
         
         if (bodyKeplerianParams[1][3] > 0 && !(bodyKeplerianParams[1][2] < 0))
@@ -446,7 +452,7 @@ public struct OctreeBuildRoot : IJob
     [ReadOnly] public NativeArray<ulong> bodyEncodings;
     
     [NativeDisableUnsafePtrRestriction] public UnsafeAtomicCounter32 octantPoolStartMarker;
-    
+    public int splittingThreshold;
     
     public void Execute()
     {
@@ -465,7 +471,7 @@ public struct OctreeBuildRoot : IJob
 
             int depth = octantDepths[currentOctant];
             
-            if (depth >= maxDepth || octantBodyCounts[currentOctant] < 2) continue;
+            if (depth >= maxDepth || octantBodyCounts[currentOctant] < splittingThreshold) continue;
 
             int firstBody = octantBodyIndices[currentOctant];
             int lastBody = firstBody + octantBodyCounts[currentOctant] - 1;
@@ -524,10 +530,11 @@ public struct OctreeBuildSubtrees : IJobParallelFor
     [NativeDisableParallelForRestriction] public NativeArray<int> octantTreeChildren;
     [NativeDisableParallelForRestriction] public NativeArray<byte> octantTreeChildCount;
 
-    [ReadOnly, NativeDisableParallelForRestriction]
-    public NativeArray<ulong> bodyEncodings;
+    [ReadOnly, NativeDisableParallelForRestriction] public NativeArray<ulong> bodyEncodings;
 
     [NativeDisableUnsafePtrRestriction] public UnsafeAtomicCounter32 octantPoolStartMarker;
+    [NativeDisableParallelForRestriction] public int splittingThreshold;
+    
 
     public void Execute(int index)
     {
@@ -548,7 +555,7 @@ public struct OctreeBuildSubtrees : IJobParallelFor
             
             int depth = octantDepths[currentOctant];
 
-            if (depth >= maxDepth || octantBodyCounts[currentOctant] < 2) continue;
+            if (depth >= maxDepth || octantBodyCounts[currentOctant] < splittingThreshold) continue;
 
             int firstBody = octantBodyIndices[currentOctant];
             int lastBody = firstBody + octantBodyCounts[currentOctant] - 1;
@@ -614,9 +621,11 @@ public struct comJob : IJob
     [NativeDisableParallelForRestriction] public NativeArray<int> octantTreeChildren;
     [NativeDisableParallelForRestriction] public NativeArray<byte> octantTreeChildCount;
 
+    [NativeDisableParallelForRestriction] public int octantLimit;
+
     public void Execute()
     {
-        for (int octant = 4096 - 1; octant >= 0; octant--)
+        for (int octant = octantLimit - 1; octant >= 0; octant--)
         {
             if (octantSizes[octant] <= 0) continue;
 
@@ -684,6 +693,7 @@ public struct ForceJob : IJobParallelFor
     [ReadOnly] public double openingAngle;
     
     [WriteOnly] public NativeArray<double3> bodyForces;
+    [ReadOnly] public int softening;
     
     public void Execute(int body)
     {
@@ -704,7 +714,7 @@ public struct ForceJob : IJobParallelFor
             stack.RemoveAt(stack.Length - 1);
 
             double3 distance = (octantCOMs[currentOctant] - bodyPositions[body]);
-            double distanceSquared = distance.x * distance.x + distance.y * distance.y + distance.z * distance.z;
+            double distanceSquared = math.lengthsq(distance) + softening;
             if (distanceSquared == 0) continue;
 
             if (octantMasses[currentOctant] == 0) continue;
@@ -719,7 +729,8 @@ public struct ForceJob : IJobParallelFor
             
             if (approximate && !containsBody)
             {
-                netForce += (gravitationalConstant * (bodyMasses[body] * octantMasses[currentOctant]) / distanceSquared) * (distance / math.sqrt(distanceSquared));
+                double rsqrtDistance = math.rsqrt(distanceSquared);
+                netForce += gravitationalConstant * bodyMasses[body] * octantMasses[currentOctant] * (rsqrtDistance * rsqrtDistance * rsqrtDistance) * distance;
             }
             else
             {
@@ -744,10 +755,11 @@ public struct ForceJob : IJobParallelFor
                         if(selectedBody == body) continue;
                         
                         double3 bodyDistance = (bodyPositions[selectedBody] - bodyPositions[body]);
-                        double bodyDistanceSquared = bodyDistance.x * bodyDistance.x + bodyDistance.y * bodyDistance.y + bodyDistance.z * bodyDistance.z;
+                        double bodyDistanceSquared = math.lengthsq(bodyDistance) + softening;
+                        double rsqrtDistance = math.rsqrt(bodyDistanceSquared);
                         if (bodyDistanceSquared == 0) continue;
                         
-                        netForce += (gravitationalConstant * (bodyMasses[body] * bodyMasses[selectedBody]) / bodyDistanceSquared) * (bodyDistance / math.sqrt(bodyDistanceSquared));
+                        netForce += gravitationalConstant * bodyMasses[body] * bodyMasses[selectedBody] * (rsqrtDistance * rsqrtDistance * rsqrtDistance) * distance;
                     }
                 }
             }

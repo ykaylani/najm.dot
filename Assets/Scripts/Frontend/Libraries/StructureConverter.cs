@@ -24,6 +24,7 @@ public static class StructureConverter
         {
             store.positions[i] = AoSbodies[i].position;
             store.masses[i] = AoSbodies[i].mass;
+            store.velocities[i] = AoSbodies[i].velocity;
             double4x2 kp = new double4x2();
             kp[1][2] = AoSbodies[i].primaryBody;
             kp[0][1] = AoSbodies[i].eccentricity;
@@ -51,6 +52,7 @@ public static class StructureConverter
             array[i].argumentOfPeriapsis = keplerianParams[i][1][0];
             array[i].inclination = keplerianParams[i][0][3];
             array[i].longitudeOfTheAscendingNode = keplerianParams[i][0][2];
+            array[i].velocity = double3.zero;
         }
         
         return array;
