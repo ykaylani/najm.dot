@@ -1,15 +1,29 @@
 # najm.dot
 
-A high-performance, real-time N-Body gravity simulation implemented in Unity's Data-Oriented Tech Stack (DOTS). It leverages the Barnes-Hut algorithm and Morton encoding to efficiently simulate thousands of gravitationally interacting bodies with physically accurate initial conditions.
 
-![30,000-Body Plummer Simulation](https://media/Movie_009.gif)
-
-## Features
-- **High-Performance Barnes-Hut Algorithm**: Reduces complexity from O(n²) to O(n log n) using a morton-encoded octree built with a parallel radix sort.
-- **Data-Oriented Design**: Struct-Of-Arrays used for Processing to achieve High-Performance while also converting the SoA into AoS for easy editing.
-- **Physically Accurate Initial Conditions**: Generates stable Keplerian orbits from standard orbital elements (semimajor axis, eccentricity, inclination, etc.).
-- **Massively Parallel CPU Computation**: Fully multithreaded using Unity's Job System and Burst compiler for optimal performance.
-- **Custom Tooling**: An intuitive custom inspector for managing simulation parameters and body properties.
+<table style="border: none; border-collapse: collapse; width: 100%;">
+  <tr>
+    <!-- Text Cell -->
+    <td style="border: none; padding: 0; margin: 0;" width="60%" valign="top">
+      <h2>High-Performance N-Body Simulation</h2>
+      This simulation leverages Unity's Data-Oriented Tech Stack (DOTS) and the Barnes-Hut algorithm to efficiently compute gravitational forces for tens of thousands of bodies in real-time.
+      <br><br>
+      <b>Features:</b>
+      <ul>
+        <b>High-Performance Barnes-Hut Algorithm</b>: Reduces complexity from O(n²) to O(n log n) using a morton-encoded octree built with a parallel radix sort.<br><br>
+        <b>Data-Oriented Design</b>: Struct-Of-Arrays used for Processing to achieve High-Performance while also converting the SoA into AoS for easy editing.<br><br>
+        <b>Physically Accurate Initial Conditions</b>: Generates stable Keplerian orbits from standard orbital elements (semimajor axis, eccentricity, inclination, etc.).<br><br>
+        <b>Massively Parallel CPU Computation</b>: Fully multithreaded using Unity's Job System and Burst compiler for optimal performance.<br><br>
+        <b>Custom Tooling</b>: An intuitive custom inspector for managing simulation parameters and body properties.<br><br>
+      </ul>
+    </td>
+    <!-- GIF Cell -->
+    <td style="border: none; padding: 0; margin: 0;" width="40%" valign="top" align="center">
+      <img src="media/Movie_009.gif" width="100%" alt="30,000-Body Plummer Simulation"/>
+      30,000-Body Plummer Simulation
+    </td>
+  </tr>
+</table>
 
 ## Getting Started
 
