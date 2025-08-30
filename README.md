@@ -20,7 +20,7 @@
     <!-- GIF Cell -->
     <td style="border: none; padding: 0; margin: 0;" width="40%" valign="top" align="center">
       <img src="media/Movie_009.gif" width="100%" alt="30,000-Body Plummer Simulation"/>
-      30,000-Body Realtime Star Cluster (Plummer Model)
+      30,000-Body Realtime Star Cluster (Plummer Model, θ = 0.5)
     </td>
   </tr>
 </table>
