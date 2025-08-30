@@ -2,6 +2,8 @@
 
 A high-performance, real-time N-Body gravity simulation implemented in Unity's Data-Oriented Tech Stack (DOTS). It leverages the Barnes-Hut algorithm and Morton encoding to efficiently simulate thousands of gravitationally interacting bodies with physically accurate initial conditions.
 
+![30,000-Body Plummer Simulation](https://media/Movie_009.gif)
+
 ## Features
 - **High-Performance Barnes-Hut Algorithm**: Reduces complexity from O(n²) to O(n log n) using a morton-encoded octree built with a parallel radix sort.
 - **Data-Oriented Design**: Struct-Of-Arrays used for Processing to achieve High-Performance while also converting the SoA into AoS for easy editing.
