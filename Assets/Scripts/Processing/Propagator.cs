@@ -5,12 +5,29 @@ using UnityEngine;
 using Unity.Burst;
 using Unity.Jobs;
 
+/*#if !USE_FLOAT
+    using Precision = System.Single;
+    using Precision3 = Unity.Mathematics.float3;
+    using Precision4 = Unity.Mathematics.float4;
+    using Precision4x2 = Unity.Mathematics.float4x2;
+#else
+    using Precision = System.Double;
+    using Precision3 = Unity.Mathematics.double3;
+    using Precision4 = Unity.Mathematics.double4;
+    using Precision4x2 = Unity.Mathematics.double4x2;
+#endif*/
+    
+using Precision = System.Double;
+using Precision3 = Unity.Mathematics.double3;
+using Precision4 = Unity.Mathematics.double4;
+using Precision4x2 = Unity.Mathematics.double4x2;
+
 public class OctantStore
 {
-    public NativeArray<double3> positions;
-    public NativeArray<double3> coms;
-    public NativeArray<double> masses;
-    public NativeArray<double> sizes;
+    public NativeArray<Precision3> positions;
+    public NativeArray<Precision3> coms;
+    public NativeArray<Precision> masses;
+    public NativeArray<Precision> sizes;
 
     public NativeArray<int> bodyIndices;
     public NativeArray<int> bodyCounts;
@@ -25,13 +42,13 @@ public class OctantStore
 
 public class BodyStore
 {
-    public NativeArray<double3> positions;
-    public NativeArray<double3> velocities;
-    public NativeArray<double> masses;
+    public NativeArray<Precision3> positions;
+    public NativeArray<Precision3> velocities;
+    public NativeArray<Precision> masses;
 
     public NativeArray<ulong> encodings;
     
-    public NativeArray<double4x2> keplerianParams; //m00 is semimajor axis, m01 is eccentricity, m02 is longitude of ascending node, m03 is inclination, m10 is periapsis, m11 is true anomaly, m12 is orbitingAround, and m13 is calculating semimajor axis toggle.
+    public NativeArray<Precision4x2> keplerianParams; //m00 is semimajor axis, m01 is eccentricity, m02 is longitude of ascending node, m03 is inclination, m10 is periapsis, m11 is true anomaly, m12 is orbitingAround, and m13 is calculating semimajor axis toggle.
 }
 
 [DefaultExecutionOrder(500)]
@@ -39,13 +56,13 @@ public class BodyStore
 public class Propagator : MonoBehaviour
 {
     [Tooltip("x is simulation scale, y is simulation timestep, z is bounds, w is padding")]
-    public double4 simulationSettings = new double4(1e9, 0.02, 200, 10);
-    public double simulationTimestepMultiplier = 1;
+    public Precision4 simulationSettings = new Precision4((Precision)1e9, (Precision)0.02, (Precision)200, (Precision)10);
+    public Precision simulationTimestepMultiplier = 1;
     
     [Tooltip("The s/d criterion for barnes-hut to determine if it should use the approximation of an octant or compute each body. Lower Values make it more accurate and higher values make it more performant.")]
-    [Range(0, 1)]public float openingAngleCriterion = 0.5f;
+    [Range(0, 1)]public Precision openingAngleCriterion = 0.5f;
     
-    private double gravitationalConstant = 6.67e-11;
+    [HideInInspector] public Precision gravitationalConstant = (Precision)6.67e-11;
     public int maxOctants = 16384;
     public int splittingThreshold = 16;
     public int softeningLengthSquared = 5000;
@@ -53,12 +70,12 @@ public class Propagator : MonoBehaviour
     public BodyStore bodies = new BodyStore();
     private OctantStore octants = new OctantStore();
     
-    private NativeArray<double3> bodyForces;
+    private NativeArray<Precision3> bodyForces;
     
     private NativeArray<ulong> tempBodyEncodings;
-    private NativeArray<double3> tempBodyPositions;
-    private NativeArray<double3> tempBodyVelocities;
-    private NativeArray<double> tempBodyMasses;
+    private NativeArray<Precision3> tempBodyPositions;
+    private NativeArray<Precision3> tempBodyVelocities;
+    private NativeArray<Precision> tempBodyMasses;
 
     private NativeArray<int> globalHistogram;
     private NativeArray<int> histograms;
@@ -85,10 +102,10 @@ public class Propagator : MonoBehaviour
         gravitationalConstant /= simulationSettings.x * simulationSettings.x * simulationSettings.x;
         gravitationalConstant *= simulationTimestepMultiplier * simulationTimestepMultiplier;
         
-        octants.positions = new NativeArray<double3>(maxOctants, Allocator.Persistent);
-        octants.coms = new NativeArray<double3>(maxOctants, Allocator.Persistent);
-        octants.masses = new NativeArray<double>(maxOctants, Allocator.Persistent);
-        octants.sizes = new NativeArray<double>(maxOctants, Allocator.Persistent);
+        octants.positions = new NativeArray<Precision3>(maxOctants, Allocator.Persistent);
+        octants.coms = new NativeArray<Precision3>(maxOctants, Allocator.Persistent);
+        octants.masses = new NativeArray<Precision>(maxOctants, Allocator.Persistent);
+        octants.sizes = new NativeArray<Precision>(maxOctants, Allocator.Persistent);
         
         octants.bodyIndices = new NativeArray<int>(maxOctants, Allocator.Persistent);
         for(int i = 0; i < octants.bodyIndices.Length; i++) octants.bodyIndices[i] = -1;
@@ -99,16 +116,16 @@ public class Propagator : MonoBehaviour
         octants.treeChildren = new NativeArray<int>(maxOctants * 8, Allocator.Persistent);
 
         bodies.encodings = new NativeArray<ulong>(bodies.positions.Length, Allocator.Persistent);
-        bodyForces = new NativeArray<double3>(bodies.positions.Length, Allocator.Persistent);
+        bodyForces = new NativeArray<Precision3>(bodies.positions.Length, Allocator.Persistent);
         
         globalHistogram = new NativeArray<int>(256, Allocator.Persistent);
         histograms = new NativeArray<int>(256 * 16, Allocator.Persistent);
         prefixSums = new NativeArray<int>(256, Allocator.Persistent);
         
         tempBodyEncodings = new NativeArray<ulong>(bodies.encodings.Length, Allocator.Persistent);
-        tempBodyPositions = new NativeArray<double3>(bodies.positions.Length, Allocator.Persistent);
-        tempBodyMasses = new NativeArray<double>(bodies.masses.Length, Allocator.Persistent);
-        tempBodyVelocities = new NativeArray<double3>(bodies.velocities.Length, Allocator.Persistent);
+        tempBodyPositions = new NativeArray<Precision3>(bodies.positions.Length, Allocator.Persistent);
+        tempBodyMasses = new NativeArray<Precision>(bodies.masses.Length, Allocator.Persistent);
+        tempBodyVelocities = new NativeArray<Precision3>(bodies.velocities.Length, Allocator.Persistent);
         
         octants.poolMarker = new NativeArray<int>(1, Allocator.Persistent);
         octants.poolMarker[0] = 1;
@@ -142,7 +159,7 @@ public class Propagator : MonoBehaviour
 
         encoderJob = new Encoder.BodyEncoding
         {
-            maxBounds = new double3(simulationSettings.z + simulationSettings.w),
+            maxBounds = new Precision3(simulationSettings.z + simulationSettings.w),
             encodings = bodies.encodings,
             positions = bodies.positions,
         };
@@ -244,16 +261,16 @@ public class Propagator : MonoBehaviour
         
         for (int i = 0; i < bodies.positions.Length; i++)
         {
-            double3 force = bodyForces[i];
+            Precision3 force = bodyForces[i];
             bodies.velocities[i] += Time.fixedDeltaTime * (force / bodies.masses[i]);
             bodies.positions[i] += Time.fixedDeltaTime * bodies.velocities[i];
-            bodyForces[i] = double3.zero;
+            bodyForces[i] = Precision3.zero;
         }
         
         octants.poolMarker[0] = 1;
         
-        dependency = resetOctants.Schedule(octants.positions.Length, 32, dependency);
-        dependency = encoderJob.Schedule(bodies.encodings.Length, 32, dependency);
+        dependency = resetOctants.Schedule(octants.positions.Length, 512, dependency);
+        dependency = encoderJob.Schedule(bodies.encodings.Length, 512, dependency);
 
         for (int i = 0; i < 8; i++)
         {
@@ -289,7 +306,7 @@ public class Propagator : MonoBehaviour
         dependency = octreeBuildRootJob.Schedule(dependency);
         dependency = octreeBuildSubtreesJob.Schedule(8, 1, dependency);
         dependency = comsJob.Schedule(dependency);
-        dependency = forceJob.Schedule(bodies.positions.Length, 16, dependency);
+        dependency = forceJob.Schedule(bodies.positions.Length, 512, dependency);
         dependency.Complete();
     }
     
@@ -334,13 +351,13 @@ public struct ResetOctantsJob : IJobParallelFor
     [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<byte> octantTreeChildCount;
     [NativeDisableParallelForRestriction] public NativeArray<int> octantTreeChildren;
     [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<int> octantDepths;
-    [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<double> octantMasses;
-    [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<double3> octantComs;
-    [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<double3> octantPositions;
-    [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<double> octantSizes;
+    [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<Precision> octantMasses;
+    [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<Precision3> octantComs;
+    [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<Precision3> octantPositions;
+    [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<Precision> octantSizes;
     [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<int> octantBodyIndices;
     
-    [ReadOnly, NativeDisableParallelForRestriction] public double4 simulationSettings;
+    [ReadOnly, NativeDisableParallelForRestriction] public Precision4 simulationSettings;
     [ReadOnly, NativeDisableParallelForRestriction] public int bodyCount;
     
     public void Execute(int octant)
@@ -349,14 +366,14 @@ public struct ResetOctantsJob : IJobParallelFor
         octantTreeChildCount[octant] = 0;
         octantDepths[octant] = 0;
         octantMasses[octant] = 0;
-        octantComs[octant] = double3.zero;
-        octantPositions[octant] = double3.zero;
+        octantComs[octant] = Precision3.zero;
+        octantPositions[octant] = Precision3.zero;
         octantSizes[octant] = -1;
         octantBodyIndices[octant] = -1;
 
         if (octant == 0)
         {
-            octantPositions[octant] = double3.zero;
+            octantPositions[octant] = Precision3.zero;
             octantSizes[octant] = simulationSettings.z + simulationSettings.w;
             octantDepths[octant] = 0;
             octantBodyCounts[octant] = bodyCount;
@@ -373,65 +390,65 @@ public struct ResetOctantsJob : IJobParallelFor
 [BurstCompile]
 public struct CalculateVelocities : IJobParallelFor
 {
-    [ReadOnly]public NativeArray<double4x2> keplerianParams;
+    [ReadOnly]public NativeArray<Precision4x2> keplerianParams;
     
-    [WriteOnly] public NativeArray<double3> bodyVelocities;
-    [ReadOnly] public NativeArray<double3> bodyPostitions;
-    [ReadOnly] public NativeArray<double> bodyMasses;
+    [WriteOnly] public NativeArray<Precision3> bodyVelocities;
+    [ReadOnly] public NativeArray<Precision3> bodyPostitions;
+    [ReadOnly] public NativeArray<Precision> bodyMasses;
 
-    [ReadOnly] public double gravitationalConstant;
+    [ReadOnly] public Precision gravitationalConstant;
 
     public void Execute(int body)
     {
         if (!(keplerianParams[body][1][2] >= 0)) {return;}
-        double4x2 bodyKeplerianParams = keplerianParams[body];
+        Precision4x2 bodyKeplerianParams = keplerianParams[body];
         
         if (bodyKeplerianParams[1][3] > 0 && !(bodyKeplerianParams[1][2] < 0))
         {
-            double3 relativePosition = bodyPostitions[body] - bodyPostitions[(int)bodyKeplerianParams[1][2]];
+            Precision3 relativePosition = bodyPostitions[body] - bodyPostitions[(int)bodyKeplerianParams[1][2]];
                 
-            double4x2 kp = bodyKeplerianParams;
+            Precision4x2 kp = bodyKeplerianParams;
             kp[0][0] = math.length(relativePosition);
             bodyKeplerianParams = kp;
         }
         
-        double4 transformation = new double4(0, 0, 0, gravitationalConstant * bodyMasses[(int)bodyKeplerianParams[1][2]]);
+        Precision4 transformation = new Precision4(0, 0, 0, gravitationalConstant * bodyMasses[(int)bodyKeplerianParams[1][2]]);
 
-        double eccentricity = bodyKeplerianParams[0][1];
+        Precision eccentricity = bodyKeplerianParams[0][1];
         
-        double factor = transformation.w / math.sqrt(transformation.w * bodyKeplerianParams[0][0] * (1 - eccentricity * eccentricity));
+        Precision factor = transformation.w / math.sqrt(transformation.w * bodyKeplerianParams[0][0] * (1 - eccentricity * eccentricity));
 
-        double trueAnomaly = bodyKeplerianParams[1][1];
-        double periapsis = bodyKeplerianParams[1][0];
-        double inclination = bodyKeplerianParams[0][3];
-        double ascendingNode = bodyKeplerianParams[0][2];
+        Precision trueAnomaly = bodyKeplerianParams[1][1];
+        Precision periapsis = bodyKeplerianParams[1][0];
+        Precision inclination = bodyKeplerianParams[0][3];
+        Precision ascendingNode = bodyKeplerianParams[0][2];
         
-        double taSin = math.sin(trueAnomaly);
-        double taCos = math.cos(trueAnomaly);
-        double periapsisSin = math.sin(periapsis);
-        double periapsisCos = math.cos(periapsis);
-        double inclinationSin = math.sin(inclination);
-        double inclinationCos = math.cos(inclination);
-        double ascendingNodeSin = math.sin(ascendingNode);
-        double ascendingNodeCos = math.cos(ascendingNode);
+        Precision taSin = math.sin(trueAnomaly);
+        Precision taCos = math.cos(trueAnomaly);
+        Precision periapsisSin = math.sin(periapsis);
+        Precision periapsisCos = math.cos(periapsis);
+        Precision inclinationSin = math.sin(inclination);
+        Precision inclinationCos = math.cos(inclination);
+        Precision ascendingNodeSin = math.sin(ascendingNode);
+        Precision ascendingNodeCos = math.cos(ascendingNode);
         
         //perifocal and periapsis rotations
         transformation.x = -factor * taSin * periapsisCos - factor * (eccentricity + taCos) * periapsisSin;
         transformation.y = -factor * taSin * periapsisSin + factor * (eccentricity + taCos) * periapsisCos;
         
         //transformation.x carries over to ascending node rotation (this is inclination)
-        double tempy = transformation.y;
-        double tempz = transformation.z;
+        Precision tempy = transformation.y;
+        Precision tempz = transformation.z;
         transformation.y = tempy * inclinationCos - tempz * inclinationSin;
         transformation.z = tempy * inclinationSin + tempz * inclinationCos;
         
         //ascending node rotation (z is not modified)
-        double tempx = transformation.x;
-        double tempy2 = transformation.y;
+        Precision tempx = transformation.x;
+        Precision tempy2 = transformation.y;
         transformation.x = tempx * ascendingNodeCos - tempy2 * ascendingNodeSin;
         transformation.y = tempx * ascendingNodeSin + tempy2 * ascendingNodeCos;
         
-        double3 final = new double3(transformation.x, transformation.z, transformation.y);
+        Precision3 final = new Precision3(transformation.x, transformation.z, transformation.y);
         bodyVelocities[body] = final;
     }
 }
@@ -443,8 +460,8 @@ public struct OctreeBuildRoot : IJob
     public NativeArray<int> octantBodyCounts;
     public NativeArray<int> octantBodyIndices;
     
-    public NativeArray<double> octantSizes;
-    public NativeArray<double3> octantPositions;
+    public NativeArray<Precision> octantSizes;
+    public NativeArray<Precision3> octantPositions;
     
     public NativeArray<int> octantTreeChildren;
     public NativeArray<byte> octantTreeChildCount;
@@ -504,10 +521,10 @@ public struct OctreeBuildRoot : IJob
         octantBodyCounts[childOctant] = end - start + 1;
         octantDepths[childOctant] = depth + 1;
         
-        double parentSize = octantSizes[parent];
+        Precision parentSize = octantSizes[parent];
         
         octantSizes[childOctant] = parentSize / 2;
-        double3 childOffset = new double3((child & 1) != 0 ? 0.25 : -0.25, (child & 2) != 0 ? 0.25 : -0.25, (child & 4) != 0 ? 0.25 : -0.25) * parentSize;
+        Precision3 childOffset = new Precision3((Precision)((child & 1) != 0 ? 0.25 : -0.25), (Precision)((child & 2) != 0 ? 0.25 : -0.25), (Precision)((child & 4) != 0 ? 0.25 : -0.25)) * parentSize;
         octantPositions[childOctant] = octantPositions[parent] + childOffset;
 
         octantTreeChildren[parent * 8 + child] = childOctant;
@@ -524,8 +541,8 @@ public struct OctreeBuildSubtrees : IJobParallelFor
     [NativeDisableParallelForRestriction] public NativeArray<int> octantBodyCounts;
     [NativeDisableParallelForRestriction] public NativeArray<int> octantBodyIndices;
 
-    [NativeDisableParallelForRestriction] public NativeArray<double> octantSizes;
-    [NativeDisableParallelForRestriction] public NativeArray<double3> octantPositions;
+    [NativeDisableParallelForRestriction] public NativeArray<Precision> octantSizes;
+    [NativeDisableParallelForRestriction] public NativeArray<Precision3> octantPositions;
 
     [NativeDisableParallelForRestriction] public NativeArray<int> octantTreeChildren;
     [NativeDisableParallelForRestriction] public NativeArray<byte> octantTreeChildCount;
@@ -592,10 +609,10 @@ public struct OctreeBuildSubtrees : IJobParallelFor
         octantBodyCounts[childOctant] = end - start + 1;
         octantDepths[childOctant] = depth + 1;
 
-        double parentSize = octantSizes[parent];
+        Precision parentSize = octantSizes[parent];
 
         octantSizes[childOctant] = parentSize / 2;
-        double3 childOffset = new double3((child & 1) != 0 ? 0.25 : -0.25, (child & 2) != 0 ? 0.25 : -0.25, (child & 4) != 0 ? 0.25 : -0.25) * parentSize;
+        Precision3 childOffset = new Precision3((Precision)((child & 1) != 0 ? 0.25 : -0.25), (Precision)((child & 2) != 0 ? 0.25 : -0.25), (Precision)((child & 4) != 0 ? 0.25 : -0.25)) * parentSize;
         octantPositions[childOctant] = octantPositions[parent] + childOffset;
 
         octantTreeChildren[treeIndex] = childOctant;
@@ -608,12 +625,12 @@ public struct OctreeBuildSubtrees : IJobParallelFor
 [BurstCompile]
 public struct comJob : IJob
 {
-    [NativeDisableParallelForRestriction] public NativeArray<double3> bodyPositions;
-    [NativeDisableParallelForRestriction] public NativeArray<double> bodyMasses;
+    [NativeDisableParallelForRestriction] public NativeArray<Precision3> bodyPositions;
+    [NativeDisableParallelForRestriction] public NativeArray<Precision> bodyMasses;
 
-    [NativeDisableParallelForRestriction] public NativeArray<double3> octantCOMs;
-    [NativeDisableParallelForRestriction] public NativeArray<double> octantMasses;
-    [NativeDisableParallelForRestriction] public NativeArray<double> octantSizes;
+    [NativeDisableParallelForRestriction] public NativeArray<Precision3> octantCOMs;
+    [NativeDisableParallelForRestriction] public NativeArray<Precision> octantMasses;
+    [NativeDisableParallelForRestriction] public NativeArray<Precision> octantSizes;
     
     [NativeDisableParallelForRestriction] public NativeArray<int> octantBodyIndices;
     [NativeDisableParallelForRestriction] public NativeArray<int> octantBodyCounts;
@@ -632,11 +649,11 @@ public struct comJob : IJob
             int childCount = octantBodyCounts[octant];
             int childStart = octantBodyIndices[octant];
 
-            octantCOMs[octant] = double3.zero;
+            octantCOMs[octant] = Precision3.zero;
             octantMasses[octant] = 0;
 
-            double totalMass = 0;
-            double3 totalCOM = double3.zero;
+            Precision totalMass = 0;
+            Precision3 totalCOM = Precision3.zero;
 
             if (octantTreeChildCount[octant] > 0)
             {
@@ -646,7 +663,7 @@ public struct comJob : IJob
                     int child = octantTreeChildren[baseChild + k];
                     if (child < 0) continue;
 
-                    double mass = octantMasses[child];
+                    Precision mass = octantMasses[child];
                     if (mass <= 0.0) continue;
 
                     totalMass += mass;
@@ -676,12 +693,12 @@ public struct comJob : IJob
 [BurstCompile]
 public struct ForceJob : IJobParallelFor
 {
-    [ReadOnly] public NativeArray<double3> bodyPositions;
-    [ReadOnly] public NativeArray<double> bodyMasses;
+    [ReadOnly] public NativeArray<Precision3> bodyPositions;
+    [ReadOnly] public NativeArray<Precision> bodyMasses;
     
-    [ReadOnly] public NativeArray<double3> octantCOMs;
-    [ReadOnly] public NativeArray<double> octantMasses;
-    [ReadOnly] public NativeArray<double> octantSizes;
+    [ReadOnly] public NativeArray<Precision3> octantCOMs;
+    [ReadOnly] public NativeArray<Precision> octantMasses;
+    [ReadOnly] public NativeArray<Precision> octantSizes;
 
     [ReadOnly] public NativeArray<int> octantBodyCounts;
     [ReadOnly] public NativeArray<int> octantBodyIndices;
@@ -689,34 +706,34 @@ public struct ForceJob : IJobParallelFor
     [ReadOnly] public NativeArray<int> octantTreeChildren;
     [ReadOnly] public NativeArray<byte> octantTreeChildCount;
     
-    [ReadOnly] public double gravitationalConstant;
-    [ReadOnly] public double openingAngle;
+    [ReadOnly] public Precision gravitationalConstant;
+    [ReadOnly] public Precision openingAngle;
     
-    [WriteOnly] public NativeArray<double3> bodyForces;
+    [WriteOnly] public NativeArray<Precision3> bodyForces;
     [ReadOnly] public int softening;
     
     public void Execute(int body)
     {
-        double3 force = Force(body, 0, openingAngle); 
+        Precision3 force = Force(body, 0, openingAngle); 
         bodyForces[body] = force;
     }
     
-    private double3 Force(int body, int startOctant, double openingAngle)
+    private Precision3 Force(int body, int startOctant, Precision openingAngle)
     {
-        FixedList512Bytes<int> stack = new FixedList512Bytes<int>();
+        FixedList4096Bytes<int> stack = new FixedList4096Bytes<int>();
         stack.Add(startOctant);
         
-        double3 netForce = double3.zero;
+        Precision3 netForce = Precision3.zero;
         
         while (stack.Length > 0)
         {
             int currentOctant = stack[stack.Length - 1];
             stack.RemoveAt(stack.Length - 1);
 
-            double3 distance = (octantCOMs[currentOctant] - bodyPositions[body]);
-            double distanceSquared = math.lengthsq(distance) + softening;
-            if (distanceSquared == 0) continue;
-
+            Precision3 distance = (octantCOMs[currentOctant] - bodyPositions[body]);
+            Precision distanceSquared = math.lengthsq(distance) + softening;
+            
+            if (distanceSquared == 1e-10f) continue;
             if (octantMasses[currentOctant] == 0) continue;
             
             int startIndex = octantBodyIndices[currentOctant];
@@ -729,8 +746,11 @@ public struct ForceJob : IJobParallelFor
             
             if (approximate && !containsBody)
             {
-                double rsqrtDistance = math.rsqrt(distanceSquared);
-                netForce += gravitationalConstant * bodyMasses[body] * octantMasses[currentOctant] * (rsqrtDistance * rsqrtDistance * rsqrtDistance) * distance;
+                Precision rsqrtDistance = math.rsqrt(distanceSquared);
+                Precision force = gravitationalConstant * bodyMasses[body] * octantMasses[currentOctant] * (rsqrtDistance * rsqrtDistance * rsqrtDistance);
+                Precision3 direction = distance;
+                if (math.isnan(force) || math.isinf(force)) Debug.LogError($"Invalid forceMagnitude: {force}");
+                netForce += force * direction;
             }
             else
             {
@@ -754,12 +774,16 @@ public struct ForceJob : IJobParallelFor
                         int selectedBody = childStart + i;
                         if(selectedBody == body) continue;
                         
-                        double3 bodyDistance = (bodyPositions[selectedBody] - bodyPositions[body]);
-                        double bodyDistanceSquared = math.lengthsq(bodyDistance) + softening;
-                        double rsqrtDistance = math.rsqrt(bodyDistanceSquared);
-                        if (bodyDistanceSquared == 0) continue;
+                        Precision3 bodyDistance = (bodyPositions[selectedBody] - bodyPositions[body]);
+                        Precision bodyDistanceSquared = math.lengthsq(bodyDistance) + softening;
+                        Precision rsqrtDistance = math.rsqrt(bodyDistanceSquared);
+                        if (bodyDistanceSquared == 1e-10f) continue;
                         
-                        netForce += gravitationalConstant * bodyMasses[body] * bodyMasses[selectedBody] * (rsqrtDistance * rsqrtDistance * rsqrtDistance) * distance;
+                        Precision force = gravitationalConstant * bodyMasses[body] * bodyMasses[selectedBody] * (rsqrtDistance * rsqrtDistance * rsqrtDistance);
+                        Precision3 direction = distance;
+                        if (math.isnan(force) || math.isinf(force))
+                            Debug.LogError($"Invalid forceMagnitude: {force}");
+                        netForce += force * direction;
                     }
                 }
             }

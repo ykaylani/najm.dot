@@ -26,6 +26,7 @@ public class SceneGenerator : MonoBehaviour
     
     void Awake()
     {
+        if (!this.enabled) return;
         propagator = GetComponent<Propagator>();
         bodyInstances = new InterfacedBodyInstance[NCount];
         gravitationalConstant /= propagator.simulationSettings.x * propagator.simulationSettings.x * propagator.simulationSettings.x;
@@ -71,7 +72,7 @@ public class SceneGenerator : MonoBehaviour
         for (int i = 0; i < NCount; i++)
         {
             bodyInstances[i].mass = masses;
-            bodyInstances[i].position = new double3(Random.Range(-500, 500),  Random.Range(-500, 500), Random.Range(-500, 500));
+            bodyInstances[i].position = new double3(Random.Range(-100, 100),  Random.Range(-500, 500), Random.Range(-100, 100));
             bodyInstances[i].primaryBody = -1;
         }
         

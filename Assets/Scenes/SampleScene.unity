@@ -338,14 +338,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   simulationSettings:
-    x: 30860000000000000
+    x: 1000000000
     y: 0.02
-    z: 2000
+    z: 1000
     w: 10
-  simulationTimestepMultiplier: 60000000000000
-  openingAngleCriterion: 0.75
+  simulationTimestepMultiplier: 6000
+  openingAngleCriterion: 0
+  gravitationalConstant: 0.0000000000667
   maxOctants: 65536
-  splittingThreshold: 64
+  splittingThreshold: 1
   softeningLengthSquared: 32
 --- !u!4 &1196126445
 Transform:
@@ -434,9 +435,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b3cb6cea16445740a49bbc2f1c23528, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  generationType: 2
+  generationType: 1
   masses: 5e+33
-  NCount: 30000
+  NCount: 1024
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
