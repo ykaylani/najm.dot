@@ -13,7 +13,7 @@ N-Body Simulation implemented in Unity currently in development.
 <h4>Firstly, clone this repository: </h4>
 
 ```
-git clone https://github.com/sandalconsumer/unity-n-body.git
+git clone https://github.com/ykaylani/najm.dot.git
 ```
 
 <h4>Secondly, to open it in Unity:</h4>
