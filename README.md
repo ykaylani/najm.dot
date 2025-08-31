@@ -30,7 +30,7 @@
 ### Firstly, clone this repository: </h4>
 
 ```
-git clone https://github.com/sandalconsumer/unity-n-body.git
+git clone https://github.com/ykaylani/najm.dot.git
 ```
 ### Secondly, to open it in Unity:</h4>
 
