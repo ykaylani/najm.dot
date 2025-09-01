@@ -1,5 +1,6 @@
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using Unity.Burst;
 using Unity.Collections;
@@ -62,12 +63,15 @@ public class EnergyTracker : MonoBehaviour
         totalEnergy[currentStep] = LongToDouble(kEnergy[0]) + LongToDouble(pEnergy[0]);
     }
 
-    public void Export()
+    void Export()
     {
-        string content = string.Join("\n", totalEnergy.ToArray());
-        string filePath = Path.Combine(Application.persistentDataPath, "Energy.txt");
-        File.WriteAllText(filePath, content);
-        Debug.Log($"File saved to: {filePath}");
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.AppendLine("Diagnostic Step,Total Energy");
+
+        for (int i = 0; i < totalEnergy.Length; i++) { if(totalEnergy[i] != 0){ stringBuilder.AppendLine(i + "," + totalEnergy[i].ToString("G17")); } }
+        string filePath = Path.Combine(Application.persistentDataPath, "Energy.csv");
+        File.WriteAllText(filePath, stringBuilder.ToString());
+        Debug.Log($"Energy Saved To {filePath}");
     }
 
     void OnDestroy()

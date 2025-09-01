@@ -342,11 +342,11 @@ MonoBehaviour:
     y: 0.02
     z: 1000
     w: 10
-  simulationTimestepMultiplier: 6000
+  simulationTimestepMultiplier: 600000
   openingAngleCriterion: 0
   gravitationalConstant: 0.0000000000667
   maxOctants: 65536
-  splittingThreshold: 1
+  splittingThreshold: 16
   softeningLengthSquared: 32
 --- !u!4 &1196126445
 Transform:
@@ -430,14 +430,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1196126443}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b3cb6cea16445740a49bbc2f1c23528, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   generationType: 1
-  masses: 5e+33
-  NCount: 1024
+  masses: 5e+29
+  NCount: 2048
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -1,12 +1,14 @@
 using Unity.Collections;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 
+[RequireComponent(typeof(Propagator))]
 public class Scraper : MonoBehaviour
 {
     private Propagator propagator;
     private EnergyTracker energyTracker;
-    public int timestepPollingRate = 150; //how many timesteps it takes to poll
+    public int timestepPollingRate = 150;
     public int maxRecord = 200;
     
     private int currentStep = 0;
@@ -19,7 +21,7 @@ public class Scraper : MonoBehaviour
     void Start()
     {
         propagator = GetComponent<Propagator>();
-        energyTracker = GetComponent<EnergyTracker>();
+        TryGetComponent<EnergyTracker>(out energyTracker);
         
         positions = new NativeArray<double3>(propagator.bodies.positions.Length, Allocator.Persistent);
         velocities = new NativeArray<double3>(propagator.bodies.velocities.Length, Allocator.Persistent);
@@ -40,6 +42,8 @@ public class Scraper : MonoBehaviour
     
     void ComputeCall()
     {
+        if (currentStep >= maxRecord - 1) {Debug.LogWarning("Max Diagnostics Record Reached, Increase 'Max Record' on Scraper."); EditorApplication.isPlaying = false;}
+        
         positions = propagator.bodies.positions;
         velocities = propagator.bodies.velocities;
         masses = propagator.bodies.masses;
