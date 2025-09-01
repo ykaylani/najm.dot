@@ -7,6 +7,8 @@ public struct InterfacedBodyInstance
 {
     public double3 position;
     public double mass;
+    
+    public double3 velocity;
 
     public bool keplerianOrbit;
     public int primaryBody;
