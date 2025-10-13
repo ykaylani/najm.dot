@@ -3,21 +3,6 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
-/*#if !USE_FLOAT
-    using Precision = System.Single;
-    using Precision3 = Unity.Mathematics.float3;
-    using Precision4x2 = Unity.Mathematics.float4x2;
-#else
-    using Precision = System.Double;
-    using Precision3 = Unity.Mathematics.double3;
-    using Precision4x2 = Unity.Mathematics.double4x2;
-#endif*/
-
-using Precision = System.Double;
-using Precision3 = Unity.Mathematics.double3;
-using Precision4 = Unity.Mathematics.double4;
-using Precision4x2 = Unity.Mathematics.double4x2;
-
 [RequireComponent(typeof(Propagator))]
 public class Visualizer : MonoBehaviour
 {
@@ -26,13 +11,13 @@ public class Visualizer : MonoBehaviour
     public Material material;
     public float pointScale = 5f;
 
-    private NativeArray<Precision3> renderPositions;
+    private NativeArray<double3> renderPositions;
     private Matrix4x4[] matrices;
     private bool needsUpdate;
 
     void Start()
     {
-        renderPositions = new NativeArray<Precision3>(propagator.bodies.positions.Length, Allocator.Persistent);
+        renderPositions = new NativeArray<double3>(propagator.bodies.positions.Length, Allocator.Persistent);
         matrices = new Matrix4x4[propagator.bodies.positions.Length];
 
         for (int i = 0; i < propagator.bodies.positions.Length; i++) {renderPositions[i] = propagator.bodies.positions[i];}
@@ -64,8 +49,8 @@ public class Visualizer : MonoBehaviour
 
 struct CopyPositionsJob : IJobParallelFor
 {
-    [ReadOnly] public NativeArray<Precision3> source;
-    [WriteOnly] public NativeArray<Precision3> destination;
+    [ReadOnly] public NativeArray<double3> source;
+    [WriteOnly] public NativeArray<double3> destination;
 
     public void Execute(int index)
     {

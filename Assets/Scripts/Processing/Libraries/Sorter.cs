@@ -5,21 +5,6 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-/*#if !USE_FLOAT
-    using Precision = System.Single;
-    using Precision3 = Unity.Mathematics.float3;
-    using Precision4x2 = Unity.Mathematics.float4x2;
-#else
-    using Precision = System.Double;
-    using Precision3 = Unity.Mathematics.double3;
-    using Precision4x2 = Unity.Mathematics.double4x2;
-#endif*/
-
-using Precision = System.Double;
-using Precision3 = Unity.Mathematics.double3;
-using Precision4 = Unity.Mathematics.double4;
-using Precision4x2 = Unity.Mathematics.double4x2;
-
 public static class Sorter
 {
     [BurstCompile]
@@ -112,13 +97,13 @@ public static class Sorter
         [NativeDisableParallelForRestriction] public NativeArray<int> prefixSums;
         [ReadOnly] public int pass;
 
-        [ReadOnly, NativeDisableParallelForRestriction] public NativeArray<Precision3> positions;
-        [ReadOnly, NativeDisableParallelForRestriction] public NativeArray<Precision3> velocities;
-        [ReadOnly, NativeDisableParallelForRestriction] public NativeArray<Precision> masses;
+        [ReadOnly, NativeDisableParallelForRestriction] public NativeArray<double3> positions;
+        [ReadOnly, NativeDisableParallelForRestriction] public NativeArray<double3> velocities;
+        [ReadOnly, NativeDisableParallelForRestriction] public NativeArray<double> masses;
 
-        [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<Precision3> tempPositions;
-        [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<Precision3> tempVelocities;
-        [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<Precision> tempMasses;
+        [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<double3> tempPositions;
+        [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<double3> tempVelocities;
+        [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<double> tempMasses;
 
         public void Execute()
         {
@@ -141,36 +126,36 @@ public static class Sorter
     public unsafe struct RadixReassign : IJob
     {
         [WriteOnly] public NativeArray<ulong> encodings;
-        [WriteOnly] public NativeArray<Precision3> positions;
-        [WriteOnly] public NativeArray<Precision3> velocities;
-        [WriteOnly] public NativeArray<Precision> masses;
+        [WriteOnly] public NativeArray<double3> positions;
+        [WriteOnly] public NativeArray<double3> velocities;
+        [WriteOnly] public NativeArray<double> masses;
         
         public NativeArray<ulong> tempEncodings;
-        public NativeArray<Precision3> tempPositions;
-        public NativeArray<Precision3> tempVelocities;
-        public NativeArray<Precision> tempMasses;
+        public NativeArray<double3> tempPositions;
+        public NativeArray<double3> tempVelocities;
+        public NativeArray<double> tempMasses;
 
         public void Execute()
         {
             NativeArray<ulong>.Copy(tempEncodings, encodings);
-            NativeArray<Precision3>.Copy(tempPositions, positions);
-            NativeArray<Precision3>.Copy(tempVelocities, velocities);
-            NativeArray<Precision>.Copy(tempMasses, masses);
+            NativeArray<double3>.Copy(tempPositions, positions);
+            NativeArray<double3>.Copy(tempVelocities, velocities);
+            NativeArray<double>.Copy(tempMasses, masses);
             
             void* ptr = NativeArrayUnsafeUtility.GetUnsafePtr(tempEncodings);
             long size = tempEncodings.Length * UnsafeUtility.SizeOf<ulong>();
             UnsafeUtility.MemClear(ptr, size);
             
             ptr = NativeArrayUnsafeUtility.GetUnsafePtr(tempPositions);
-            size = tempPositions.Length * UnsafeUtility.SizeOf<Precision3>();
+            size = tempPositions.Length * UnsafeUtility.SizeOf<double3>();
             UnsafeUtility.MemClear(ptr, size);
             
             ptr = NativeArrayUnsafeUtility.GetUnsafePtr(tempVelocities);
-            size = tempVelocities.Length * UnsafeUtility.SizeOf<Precision3>();
+            size = tempVelocities.Length * UnsafeUtility.SizeOf<double3>();
             UnsafeUtility.MemClear(ptr, size);
             
             ptr = NativeArrayUnsafeUtility.GetUnsafePtr(tempMasses);
-            size = tempMasses.Length * UnsafeUtility.SizeOf<Precision>();
+            size = tempMasses.Length * UnsafeUtility.SizeOf<double>();
             UnsafeUtility.MemClear(ptr, size);
         }
     }

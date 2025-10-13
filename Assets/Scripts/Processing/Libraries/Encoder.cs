@@ -5,29 +5,14 @@ using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
-/*#if !USE_FLOAT
-    using Precision = System.Single;
-    using Precision3 = Unity.Mathematics.float3;
-    using Precision4x2 = Unity.Mathematics.float4x2;
-#else
-    using Precision = System.Double;
-    using Precision3 = Unity.Mathematics.double3;
-    using Precision4x2 = Unity.Mathematics.double4x2;
-#endif*/
-
-using Precision = System.Double;
-using Precision3 = Unity.Mathematics.double3;
-using Precision4 = Unity.Mathematics.double4;
-using Precision4x2 = Unity.Mathematics.double4x2;
-
 public static class Encoder
 {
     private const int bits = 21;
     
     [BurstCompile] [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong Morton(Precision3 position, Precision3 minBounds, Precision3 maxBounds)
+    public static ulong Morton(double3 position, double3 minBounds, double3 maxBounds)
     {
-        Precision3 normalized = (position - minBounds) / (maxBounds - minBounds);
+        double3 normalized = (position - minBounds) / (maxBounds - minBounds);
         
         ulong x = (ulong)(normalized.x * ((1ul << bits) - 1));
         ulong y = (ulong)(normalized.y * ((1ul << bits) - 1));
@@ -59,8 +44,8 @@ public static class Encoder
     [BurstCompile]
     public struct BodyEncoding : IJobParallelFor
     {
-        public Precision3 maxBounds;
-        [ReadOnly] public NativeArray<Precision3> positions;
+        public double3 maxBounds;
+        [ReadOnly] public NativeArray<double3> positions;
         [WriteOnly] public NativeArray<ulong> encodings;
     
         public void Execute(int body)
