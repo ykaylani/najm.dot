@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -12,13 +13,13 @@ public class Visualizer : MonoBehaviour
     public float pointScale = 5f;
 
     private NativeArray<double3> renderPositions;
-    private Matrix4x4[] matrices;
+    private Matrix4x4[] matrices1;
     private bool needsUpdate;
 
     void Start()
     {
         renderPositions = new NativeArray<double3>(propagator.bodies.positions.Length, Allocator.Persistent);
-        matrices = new Matrix4x4[propagator.bodies.positions.Length];
+        matrices1 = new Matrix4x4[propagator.bodies.positions.Length];
 
         for (int i = 0; i < propagator.bodies.positions.Length; i++) {renderPositions[i] = propagator.bodies.positions[i];}
     }
@@ -34,10 +35,11 @@ public class Visualizer : MonoBehaviour
         
         for (int i = 0; i < propagator.bodies.positions.Length; i++)
         {
-            matrices[i] = Matrix4x4.TRS((float3)renderPositions[i], Quaternion.identity, Vector3.one * pointScale);
+            matrices1[i] = Matrix4x4.TRS((float3)renderPositions[i], Quaternion.identity, Vector3.one * pointScale);
         }
         
-        Graphics.DrawMeshInstanced(pointMesh, 0, material, matrices, propagator.bodies.positions.Length, null, UnityEngine.Rendering.ShadowCastingMode.Off, false);
+        Graphics.DrawMeshInstanced(pointMesh, 0, material, matrices1, propagator.bodies.positions.Length, null, UnityEngine.Rendering.ShadowCastingMode.Off, false);
+
     }
 
     void OnDestroy()

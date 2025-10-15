@@ -3,12 +3,19 @@ using UnityEngine;
 
 public enum TIntegrator
 {
-    SIEuler,
-    VelocityVerlet
+    SemiImplicitEuler,
+    VelocityVerlet,
+    ExplicitEuler,
 }
 
 public static class Integrator
 {
+    public static void EEuler(ref double3 position, ref double3 velocity, ref double3 force, ref double mass)
+    {
+        position += velocity * Time.fixedDeltaTime;
+        velocity += (force / mass) * Time.fixedDeltaTime;
+    }
+    
     public static void SIEuler(ref double3 position, ref double3 velocity, ref double3 force, ref double mass)
     {
         velocity += Time.fixedDeltaTime * (force / mass);

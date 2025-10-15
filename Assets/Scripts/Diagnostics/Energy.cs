@@ -12,6 +12,7 @@ using UnityEngine;
 [RequireComponent(typeof(Scraper))]
 public class EnergyTracker : MonoBehaviour
 {
+    
     private Scraper scraper;
     private Propagator propagator;
     
@@ -65,11 +66,13 @@ public class EnergyTracker : MonoBehaviour
 
     void Export()
     {
+        if (!this.enabled) return;
+        
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.AppendLine("Diagnostic Step,Total Energy");
 
         for (int i = 0; i < totalEnergy.Length; i++) { if(totalEnergy[i] != 0){ stringBuilder.AppendLine(i + "," + totalEnergy[i].ToString("G17")); } }
-        string filePath = Path.Combine(Application.persistentDataPath, "Energy.csv");
+        string filePath = Path.Combine(Application.persistentDataPath, "Energy_" + System.DateTime.Now.ToFileTime() + ".csv");
         File.WriteAllText(filePath, stringBuilder.ToString());
         Debug.Log($"Energy Saved To {filePath}");
     }

@@ -180,10 +180,8 @@ GameObject:
   - component: {fileID: 1196126444}
   - component: {fileID: 1196126446}
   - component: {fileID: 1196126447}
-  - component: {fileID: 1196126451}
   - component: {fileID: 1196126449}
   - component: {fileID: 1196126448}
-  - component: {fileID: 1196126450}
   m_Layer: 0
   m_Name: Propagator
   m_TagString: Propagator
@@ -205,13 +203,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   simulationSettings:
     x: 1000000000
-    y: 0.02
+    y: 0.01
     z: 1000
     w: 10
   simulationTimestepMultiplier: 6000000
   openingAngleCriterion: 0
   gravitationalConstant: 0.0000000000667
-  maxOctants: 131072
+  maxOctants: 65536
   splittingThreshold: 1
   softeningLengthSquared: 0
   integrator: 1
@@ -259,11 +257,10 @@ MonoBehaviour:
     inclination: 0
     argumentOfPeriapsis: 0
     longitudeOfTheAscendingNode: 0
-    trueAnomaly: 0
   - position:
-      x: 149.6
+      x: 0
       y: 0
-      z: 0
+      z: 149.6
     mass: 5.9722e+24
     velocity:
       x: 0
@@ -271,27 +268,10 @@ MonoBehaviour:
       z: 0
     keplerianOrbit: 1
     primaryBody: 0
-    eccentricity: 0.01671022
+    eccentricity: 0.0167086
     inclination: 0.00000087266463
-    argumentOfPeriapsis: 1.796601474
-    longitudeOfTheAscendingNode: 0
-    trueAnomaly: 4.486583833179586
-  - position:
-      x: 229.55
-      y: 0
-      z: 0
-    mass: 6.418e+23
-    velocity:
-      x: 0
-      y: 0
-      z: 0
-    keplerianOrbit: 1
-    primaryBody: 0
-    eccentricity: 0.0933941
-    inclination: 0.03228318064121392
-    argumentOfPeriapsis: 5.000312980026465
-    longitudeOfTheAscendingNode: 0.86497714877
-    trueAnomaly: 0.41815249155002315
+    argumentOfPeriapsis: 5.028293574995664
+    longitudeOfTheAscendingNode: 3.052580861738082
 --- !u!114 &1196126447
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -315,7 +295,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1196126443}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d292b2c290397a240995263ffc39bbe5, type: 3}
   m_Name: 
@@ -327,40 +307,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1196126443}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 90efaed318f6e7345b0327d4f729c137, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Scraper
   timestepPollingRate: 1
   maxRecord: 50000
---- !u!114 &1196126450
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1196126443}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52fea887009ff7146b6aa8d802fcf13b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ProcessTime
---- !u!114 &1196126451
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1196126443}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3b3cb6cea16445740a49bbc2f1c23528, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SceneGenerator
-  generationType: 2
-  masses: 1.9e+25
-  NCount: 1000
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

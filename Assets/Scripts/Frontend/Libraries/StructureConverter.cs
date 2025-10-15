@@ -32,7 +32,7 @@ public static class StructureConverter
             kp[0][2] = AoSbodies[i].longitudeOfTheAscendingNode;
             kp[0][3] = AoSbodies[i].inclination;
             kp[1][3] = 1; // calculation of semimajor axis assumed
-            kp[1][1] = 0; // true anomaly assumed to be 0, going to add calculation soon
+            kp[1][1] = AoSbodies[i].trueAnomaly;
             store.keplerianParams[i] = (double4x2)kp;
         }
         
@@ -52,6 +52,7 @@ public static class StructureConverter
             array[i].argumentOfPeriapsis = keplerianParams[i][1][0];
             array[i].inclination = keplerianParams[i][0][3];
             array[i].longitudeOfTheAscendingNode = keplerianParams[i][0][2];
+            array[i].trueAnomaly = keplerianParams[i][1][1];
             array[i].velocity = double3.zero;
         }
         

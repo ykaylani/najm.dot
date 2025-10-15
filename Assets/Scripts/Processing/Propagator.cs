@@ -1,3 +1,4 @@
+using System;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -43,7 +44,7 @@ public class Propagator : MonoBehaviour
     public double simulationTimestepMultiplier = 1;
     
     [Tooltip("The s/d criterion for barnes-hut to determine if it should use the approximation of an octant or compute each body. Lower Values make it more accurate and higher values make it more performant.")]
-    [Range(0, 1)]public double openingAngleCriterion = 0.5f;
+    [Range(0, 2)]public double openingAngleCriterion = 0.5f;
     
     [HideInInspector] public double gravitationalConstant = (double)6.67e-11;
     public int maxOctants = 16384;
@@ -81,6 +82,9 @@ public class Propagator : MonoBehaviour
     
     private JobHandle initialVelocityJobHandle;
     private JobHandle dependency;
+
+    public static event Action pingS;
+    public static event Action pingE;
     
     void Start()
     {
@@ -242,6 +246,7 @@ public class Propagator : MonoBehaviour
 
     void FixedUpdate()
     {
+        pingS?.Invoke();
         if (!initialVelocityJobHandle.IsCompleted) initialVelocityJobHandle.Complete();
         
         for (int i = 0; i < bodies.positions.Length; i++)
@@ -253,8 +258,13 @@ public class Propagator : MonoBehaviour
 
             switch (integrator)
             {
-                case TIntegrator.SIEuler:
+                case TIntegrator.SemiImplicitEuler:
                     Integrator.SIEuler(ref position, ref velocity, ref force, ref mass);
+                    bodies.positions[i] = position;
+                    bodies.velocities[i] = velocity;
+                    break;
+                case TIntegrator.ExplicitEuler:
+                    Integrator.EEuler(ref position, ref velocity, ref force, ref mass);
                     bodies.positions[i] = position;
                     bodies.velocities[i] = velocity;
                     break;
@@ -323,6 +333,8 @@ public class Propagator : MonoBehaviour
                     break;
             }
         }
+        
+        pingE?.Invoke();
     }
     
     void OnDestroy()

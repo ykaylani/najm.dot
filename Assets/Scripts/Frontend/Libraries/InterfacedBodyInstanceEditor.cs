@@ -17,6 +17,7 @@ public struct InterfacedBodyInstance
     public double inclination;
     public double argumentOfPeriapsis;
     public double longitudeOfTheAscendingNode;
+    public double trueAnomaly;
 }
 
 [CustomPropertyDrawer(typeof(InterfacedBodyInstance))]
@@ -45,6 +46,7 @@ public class InterfacedBodyInstanceEditor : PropertyDrawer
         SerializedProperty inclinationProperty = property.FindPropertyRelative("inclination");
         SerializedProperty periapsisProperty = property.FindPropertyRelative("argumentOfPeriapsis");
         SerializedProperty ascendingNodeProperty = property.FindPropertyRelative("longitudeOfTheAscendingNode");
+        SerializedProperty trueAnomalyProperty = property.FindPropertyRelative("trueAnomaly");
         
         position.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
         EditorGUI.PropertyField(position, positionProperty);
@@ -71,6 +73,9 @@ public class InterfacedBodyInstanceEditor : PropertyDrawer
             
             position.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
             EditorGUI.PropertyField(position, ascendingNodeProperty);
+            
+            position.y += EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+            EditorGUI.PropertyField(position, trueAnomalyProperty);
         }
         else
         {
@@ -87,7 +92,7 @@ public class InterfacedBodyInstanceEditor : PropertyDrawer
         height += (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * 3;
         
         SerializedProperty keplerianOrbitProp = property.FindPropertyRelative("keplerianOrbit");
-        if (keplerianOrbitProp.boolValue) { height += (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * 5; }
+        if (keplerianOrbitProp.boolValue) { height += (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * 6; }
         
         return height;
     }
