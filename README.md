@@ -48,7 +48,6 @@ git clone https://github.com/ykaylani/najm.dot.git
 
 ## Technical Details
 
-- The Integrator used in this simulation is Symplectic (Semi-Implicit) Euler, with a choice of Velocity Verlet (recommended).
 - The Barnes-Hut Algorithm plays a role in making the simulation more performant by making the physics calculations O(n log n) instead of O(n²).
 - Double Precision was used instead of float because of Small Precision errors accumulating over time, causing a big error. Double Precision also has a bigger range for massive force (10<sup>-324</sup> to 10<sup>308</sup>) while float has 10<sup>-38</sup> to 10<sup>38</sup>
 
@@ -57,13 +56,14 @@ git clone https://github.com/ykaylani/najm.dot.git
 ### Major:  
  - Delinking Propagation from Unity's FixedUpdate (Predictive Simulation)
  - Custom Mesh Generation for Orbit Trails
+ - Fast Multipole Method Implementation
 
 ### Minor:
 
 - Floating Origin for Flexibility  
 - Non-Singleton Propagator for Multiple Simulations / Scene  
 - Major Event Triggers (Body Collisions, Orbit Escape, etc.)  
-- Multiple Integrators (Velocity Verlet, Symplectic Euler, Leapfrog + Yoshida)  
+- Yoshida Integration (4th and 6th Order)
 
 ## Credits and Resources
 
