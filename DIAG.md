@@ -56,5 +56,6 @@ _*Rest are automatically set by system_
 
 ### Results
 
+Note: Relative Drift and Drift / Step are in ppm
 ![](https://github.com/ykaylani/najm.dot/blob/main/diagdata/VVerlet.3Body/analysis/output.png)
 ![](https://github.com/ykaylani/najm.dot/blob/main/diagdata/VVerlet.3Body/analysis/output2.png)
