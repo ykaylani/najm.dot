@@ -39,15 +39,15 @@ public class BodyStore
 [RequireComponent(typeof(BodyFrontend))]
 public class Propagator : MonoBehaviour
 {
-    [Tooltip("x is simulation scale, y is simulation timestep, z is bounds, w is padding")]
-    public double4 simulationSettings = new double4((double)1e9, (double)0.02, (double)200, (double)10);
-    public double simulationTimestepMultiplier = 1;
+    public double scale = 1e9;
+    public double speed = 1;
     
     [Tooltip("The s/d criterion for barnes-hut to determine if it should use the approximation of an octant or compute each body. Lower Values make it more accurate and higher values make it more performant.")]
     [Range(0, 2)]public double openingAngleCriterion = 0.5f;
     
     [HideInInspector] public double gravitationalConstant = (double)6.67e-11;
     public int maxOctants = 16384;
+    public int bounds;
     public int splittingThreshold = 16;
     public int softeningLengthSquared = 5000;
     
@@ -88,8 +88,8 @@ public class Propagator : MonoBehaviour
     
     void Start()
     {
-        gravitationalConstant /= simulationSettings.x * simulationSettings.x * simulationSettings.x;
-        gravitationalConstant *= simulationTimestepMultiplier * simulationTimestepMultiplier;
+        gravitationalConstant /= scale * scale * scale;
+        gravitationalConstant *= speed * speed;
         
         octants.positions = new NativeArray<double3>(maxOctants, Allocator.Persistent);
         octants.coms = new NativeArray<double3>(maxOctants, Allocator.Persistent);
@@ -142,13 +142,13 @@ public class Propagator : MonoBehaviour
             octantPositions = octants.positions,
             octantSizes = octants.sizes,
             octantBodyIndices = octants.bodyIndices,
-            simulationSettings = simulationSettings,
+            bounds = bounds,
             bodyCount = bodies.positions.Length,
         };
 
         encoderJob = new Encoder.BodyEncoding
         {
-            maxBounds = new double3(simulationSettings.z + simulationSettings.w),
+            maxBounds = new double3(bounds),
             encodings = bodies.encodings,
             positions = bodies.positions,
         };
@@ -384,7 +384,7 @@ public struct ResetOctantsJob : IJobParallelFor
     [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<double> octantSizes;
     [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<int> octantBodyIndices;
     
-    [ReadOnly, NativeDisableParallelForRestriction] public double4 simulationSettings;
+    [ReadOnly, NativeDisableParallelForRestriction] public double bounds;
     [ReadOnly, NativeDisableParallelForRestriction] public int bodyCount;
     
     public void Execute(int octant)
@@ -401,7 +401,7 @@ public struct ResetOctantsJob : IJobParallelFor
         if (octant == 0)
         {
             octantPositions[octant] = double3.zero;
-            octantSizes[octant] = simulationSettings.z + simulationSettings.w;
+            octantSizes[octant] = bounds;
             octantDepths[octant] = 0;
             octantBodyCounts[octant] = bodyCount;
             octantBodyIndices[octant] = 0;
