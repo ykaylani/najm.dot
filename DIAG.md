@@ -21,7 +21,7 @@ Tests on older versions will be lower down the file.
 - Octant Limit: 4096
 - Octant Splitting Threshold: 1
 - Softening Length2: 0
-- Theta: 0 / 0.5 / 1 / 2
+- Theta: x
 
 ### Elements:
 #### Sun
@@ -32,7 +32,7 @@ Mass: 1.989e30
 Position: (149.6, 0, 0)  
 Mass: 5.9722e24
 
-Keplerian Parameters  
+Orbital Parameters  
 - Inclination: 8.7266463e-7  
 - Eccentricity: 0.0167086  
 - Argument of Periapsis: 5.0282935749956641  
@@ -45,7 +45,7 @@ _*Rest are automatically set by system_
 Position: (229.55, 0, 0)  
 Mass: 6.418e23  
 
-Keplerian Parameters
+Orbital Parameters
 - Inclination: 0.032283180641213917
 - Eccentricity: 0.0933941
 - Argument of Periapsis: 5.0003129800264654
@@ -55,3 +55,6 @@ Keplerian Parameters
 _*Rest are automatically set by system_
 
 ### Results
+
+![](https://github.com/ykaylani/najm.dot/blob/main/diagdata/VVerlet.3Body/analysis/output.png)
+![](https://github.com/ykaylani/najm.dot/blob/main/diagdata/VVerlet.3Body/analysis/output2.png)
