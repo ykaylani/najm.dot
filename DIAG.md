@@ -9,19 +9,19 @@ Tests on older versions will be lower down the file.
 - MSI RTX 4060 Ventus 2X OC  
 - 16GB DDR4 Dual-Channel SDRAM 1600 MHz (Actual Clock: 1597.1 MHz)  
 
-### Energy Conservation (50,000 Steps)
+### Energy Conservation / Barnes-Hut (50,000 Steps)
 ### Setup:
-- Semi-Implicit Euler / Velocity Verlet  
+- Velocity Verlet  
 - Distance Multiplier: 1e9 (1 Billion)  
 - Physical Multiplier: 6,000,000x  
-- Timestep: 0.01 (100Hz) 
+- Timestep: 0.02 (50Hz) 
 <br>
 
-- Bounds: 1000 (Padding: 10)
-- Octant Limit: 65536
+- Bounds: 1024 (Padding: 10)
+- Octant Limit: 4096
 - Octant Splitting Threshold: 1
-- Softening Length<sup>2</sup>: 0
-- Theta: 0
+- Softening Length2: 0
+- Theta: 0 / 0.5 / 1 / 2
 
 ### Elements:
 #### Sun
@@ -29,7 +29,7 @@ Position: (0, 0, 0)
 Mass: 1.989e30
 
 #### Earth
-Position: (0, 0, 149.6)  
+Position: (149.6, 0, 0)  
 Mass: 5.9722e24
 
 Keplerian Parameters  
@@ -37,15 +37,21 @@ Keplerian Parameters
 - Eccentricity: 0.0167086  
 - Argument of Periapsis: 5.0282935749956641  
 - Ascending Node Longitude: 3.0525808617380821
+- True Anomaly: 4.4865838331795862
 
-Rest are automatically set by system  
+_*Rest are automatically set by system_
+
+#### Mars
+Position: (229.55, 0, 0)  
+Mass: 6.418e23  
+
+Keplerian Parameters
+- Inclination: 0.032283180641213917
+- Eccentricity: 0.0933941
+- Argument of Periapsis: 5.0003129800264654
+- Ascending Node Longitude: 0.86497714877
+- True Anomaly: 0.41815249155002315
+
+_*Rest are automatically set by system_
 
 ### Results
-#### Run 1 / Semi-Implicit Euler:
-Secular Drift (std): 16.09 ppm  
-Oscillatory Drift (std): 1966.9 ppm  
-
-#### Run 1 / Velocity Verlet:  
-Secular Drift (std): 0.1222 ppm  
-Oscillatory Drift (std): 12.69 ppm  
-Note: Index 0 Removed (Outlier)  
