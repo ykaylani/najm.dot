@@ -46,24 +46,10 @@ git clone https://github.com/ykaylani/najm.dot.git
 
 - Press the play button in the Unity editor  
 
-## Technical Details
+## Details
 
 - The Barnes-Hut Algorithm plays a role in making the simulation more performant by making the physics calculations O(n log n) instead of O(n²).
 - Double Precision was used instead of float because of Small Precision errors accumulating over time, causing approximation error over longer periods of time. (doubles also provide a bigger range than floats which allows for things like realistic masses)
-
-## Roadmap
-
-### Major:  
- - Delinking Propagation from Unity's FixedUpdate (Predictive Simulation)
- - Custom Mesh Generation for Orbit Trails
- - Fast Multipole Method Implementation
-
-### Minor:
-
-- Floating Origin for Flexibility  
-- Non-Singleton Propagator for Multiple Simulations / Scene  
-- Major Event Triggers (Body Collisions, Orbit Escape, etc.)  
-- Yoshida Integration (4th and 6th Order)
 
 ## Credits and Resources
 
